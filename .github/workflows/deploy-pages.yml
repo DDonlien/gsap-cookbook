@@ -24,39 +24,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Stamp version
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Stamp version into dist
         shell: bash
         run: |
           python3 - <<'PY'
           import os, re, pathlib
-          sha = (os.environ.get("SHA", "UNVERSIONED") or "UNVERSIONED")[:7]
-          p = pathlib.Path("index.html")
+          sha = (os.environ.get("GITHUB_SHA", "UNVERSIONED") or "UNVERSIONED")[:7]
+          p = pathlib.Path("dist/index.html")
           s = p.read_text(encoding="utf-8")
           s2 = re.sub(r'window\.__REPO_VERSION__\s*=\s*"[^"]*"\s*;', f'window.__REPO_VERSION__ = "{sha}";', s)
           p.write_text(s2, encoding="utf-8")
           print("Stamped version:", sha)
           PY
         env:
-          SHA: ${{ github.sha }}
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Prepare site artifact
-        shell: bash
-        run: |
-          rm -rf _site
-          mkdir -p _site
-          rsync -a --delete \
-            --exclude ".git" \
-            --exclude ".github" \
-            --exclude "_site" \
-            ./ _site/
+          GITHUB_SHA: ${{ github.sha }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: dist
 
       - name: Deploy to GitHub Pages
         id: deployment

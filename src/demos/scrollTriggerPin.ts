@@ -1,4 +1,7 @@
-export const demoScrollTriggerPin = {
+import type { Demo } from "../types";
+import { gsap, ScrollTrigger } from "../gsap";
+
+export const demoScrollTriggerPin: Demo = {
   id: "scroll_trigger_pin",
   title: "SCROLL_TRIGGER_PIN",
   subtitle: "SCRUB: 1 / PIN: TRUE",
@@ -14,6 +17,9 @@ export const demoScrollTriggerPin = {
     { key: "scrub", label: "scrub", type: "range", min: 0, max: 3, step: 0.1 }
   ],
   getCode(params) {
+    const startPercent = Number(params.startPercent);
+    const end = Number(params.end);
+    const scrub = Number(params.scrub);
     return `// SCROLL_TRIGGER_PIN（在容器内滚动）
 gsap.registerPlugin(ScrollTrigger);
 
@@ -34,15 +40,15 @@ const pinBox = stage.querySelector(".pinBox");
 ScrollTrigger.create({
   trigger: pinBox,
   scroller,
-  start: "top ${Number(params.startPercent)}%",
-  end: "+=${Number(params.end)}",
+  start: "top ${startPercent}%",
+  end: "+=${end}",
   pin: true,
-  scrub: ${Number(params.scrub)}
+  scrub: ${scrub}
 });`;
   },
   mount(el, { reduceMotion, params } = {}) {
-    const p = { ...demoScrollTriggerPin.defaults, ...(params ?? {}) };
-    const ctx = window.gsap.context(() => {
+    const p = { ...(demoScrollTriggerPin.defaults ?? {}), ...(params ?? {}) } as Record<string, unknown>;
+    const ctx = gsap.context(() => {
       el.innerHTML = `
         <div class="scroller w-full h-full overflow-y-auto p-6">
           <div class="h-[120px]"></div>
@@ -55,12 +61,13 @@ ScrollTrigger.create({
         </div>
       `;
 
-      if (!window.ScrollTrigger || reduceMotion) return;
+      if (reduceMotion) return;
 
-      const scroller = /** @type {HTMLElement} */ (el.querySelector(".scroller"));
-      const pinBox = /** @type {HTMLElement} */ (el.querySelector(".pinBox"));
+      const scroller = el.querySelector(".scroller") as HTMLElement | null;
+      const pinBox = el.querySelector(".pinBox") as HTMLElement | null;
+      if (!scroller || !pinBox) return;
 
-      window.ScrollTrigger.create({
+      ScrollTrigger.create({
         trigger: pinBox,
         scroller,
         start: `top ${Number(p.startPercent)}%`,
@@ -69,9 +76,10 @@ ScrollTrigger.create({
         scrub: Number(p.scrub)
       });
 
-      window.ScrollTrigger.refresh();
+      ScrollTrigger.refresh();
     }, el);
 
     return () => ctx.revert();
   }
 };
+

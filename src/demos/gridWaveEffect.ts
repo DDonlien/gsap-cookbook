@@ -1,4 +1,7 @@
-export const demoGridWaveEffect = {
+import type { Demo } from "../types";
+import { gsap } from "../gsap";
+
+export const demoGridWaveEffect: Demo = {
   id: "grid_wave_effect",
   title: "GRID_WAVE_EFFECT",
   subtitle: 'STAGGER: { GRID: "AUTO", FROM: "CENTER" }',
@@ -28,28 +31,33 @@ export const demoGridWaveEffect = {
     { key: "color", label: "color", type: "color" }
   ],
   getCode(params) {
+    const scale = Number(params.scale);
+    const duration = Number(params.duration);
+    const each = Number(params.each);
+    const ease = String(params.ease);
+    const color = String(params.color);
     return `// GRID_WAVE_EFFECT
 const stage = document.querySelector(".stage");
 stage.innerHTML = \`
-  <div class="grid grid-cols-5 grid-rows-5 gap-1 w-[72%] aspect-square">
+  <div class="grid grid-cols-5 grid-rows-5 gap-1 w-full h-full">
     \${Array.from({length:25}).map(()=>'<div class="cell bg-outline-variant/25"></div>').join("")}
   </div>\`;
 
 const cells = stage.querySelectorAll(".cell");
 gsap.to(cells, {
-  scale: ${Number(params.scale)},
-  backgroundColor: "${params.color}",
+  scale: ${scale},
+  backgroundColor: "${color}",
   autoAlpha: 1,
-  duration: ${Number(params.duration)},
-  ease: "${params.ease}",
-  stagger: { each: ${Number(params.each)}, grid: "auto", from: "center" },
+  duration: ${duration},
+  ease: "${ease}",
+  stagger: { each: ${each}, grid: "auto", from: "center" },
   repeat: -1,
   yoyo: true
 });`;
   },
   mount(el, { reduceMotion, params } = {}) {
-    const p = { ...demoGridWaveEffect.defaults, ...(params ?? {}) };
-    const ctx = window.gsap.context(() => {
+    const p = { ...(demoGridWaveEffect.defaults ?? {}), ...(params ?? {}) } as Record<string, unknown>;
+    const ctx = gsap.context(() => {
       el.innerHTML = `
         <div class="w-full h-full p-6 flex items-center justify-center">
           <div class="grid grid-cols-5 grid-rows-5 gap-1 w-full h-full">
@@ -63,7 +71,7 @@ gsap.to(cells, {
 
       if (reduceMotion) return;
 
-      window.gsap.to(cells, {
+      gsap.to(cells, {
         scale: Number(p.scale),
         backgroundColor: String(p.color),
         autoAlpha: 1,
@@ -78,3 +86,4 @@ gsap.to(cells, {
     return () => ctx.revert();
   }
 };
+

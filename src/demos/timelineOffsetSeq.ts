@@ -1,4 +1,7 @@
-export const demoTimelineOffsetSeq = {
+import type { Demo } from "../types";
+import { gsap } from "../gsap";
+
+export const demoTimelineOffsetSeq: Demo = {
   id: "timeline_offset_seq",
   title: "TIMELINE_OFFSET_SEQ",
   subtitle: 'POSITION: "<=0.2" / OVERLAP',
@@ -30,6 +33,13 @@ export const demoTimelineOffsetSeq = {
     }
   ],
   getCode(params) {
+    const duration = Number(params.duration);
+    const overlap = Number(params.overlap);
+    const repeatDelay = Number(params.repeatDelay);
+    const amp1 = Number(params.amp1);
+    const amp3 = Number(params.amp3);
+    const ease = String(params.ease);
+
     return `// TIMELINE_OFFSET_SEQ（时间轴叠加）
 const stage = document.querySelector(".stage");
 stage.innerHTML = \`
@@ -41,20 +51,14 @@ stage.innerHTML = \`
     </div>
   </div>\`;
 
-const tl = gsap.timeline({ repeat: -1, repeatDelay: ${Number(params.repeatDelay)} });
-tl.fromTo(".bar1", { x: -${Number(params.amp1)} }, { x: ${Number(params.amp1)}, duration: ${Number(
-      params.duration
-    )}, ease: "${params.ease}" })
-  .fromTo(".bar2", { x: ${Number(params.amp1)} }, { x: -${Number(params.amp1)}, duration: ${Number(
-      params.duration
-    )}, ease: "${params.ease}" }, "<=${Number(params.overlap)}")
-  .fromTo(".bar3", { x: -${Number(params.amp3)} }, { x: ${Number(params.amp3)}, duration: ${Number(
-      params.duration
-    )}, ease: "${params.ease}" }, "<=${Number(params.overlap)}");`;
+const tl = gsap.timeline({ repeat: -1, repeatDelay: ${repeatDelay} });
+tl.fromTo(".bar1", { x: -${amp1} }, { x: ${amp1}, duration: ${duration}, ease: "${ease}" })
+  .fromTo(".bar2", { x: ${amp1} }, { x: -${amp1}, duration: ${duration}, ease: "${ease}" }, "<=${overlap}")
+  .fromTo(".bar3", { x: -${amp3} }, { x: ${amp3}, duration: ${duration}, ease: "${ease}" }, "<=${overlap}");`;
   },
   mount(el, { reduceMotion, params } = {}) {
-    const p = { ...demoTimelineOffsetSeq.defaults, ...(params ?? {}) };
-    const ctx = window.gsap.context(() => {
+    const p = { ...(demoTimelineOffsetSeq.defaults ?? {}), ...(params ?? {}) } as Record<string, unknown>;
+    const ctx = gsap.context(() => {
       el.innerHTML = `
         <div class="w-full h-full flex items-center justify-center">
           <div class="stack flex flex-col gap-2 w-2/3">
@@ -67,7 +71,7 @@ tl.fromTo(".bar1", { x: -${Number(params.amp1)} }, { x: ${Number(params.amp1)}, 
 
       if (reduceMotion) return;
 
-      const tl = window.gsap.timeline({ repeat: -1, repeatDelay: Number(p.repeatDelay) });
+      const tl = gsap.timeline({ repeat: -1, repeatDelay: Number(p.repeatDelay) });
       tl.fromTo(
         ".bar1",
         { x: -Number(p.amp1) },
@@ -90,3 +94,4 @@ tl.fromTo(".bar1", { x: -${Number(params.amp1)} }, { x: ${Number(params.amp1)}, 
     return () => ctx.revert();
   }
 };
+

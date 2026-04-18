@@ -1,4 +1,7 @@
-export const demoScalePulseV2 = {
+import type { Demo } from "../types";
+import { gsap } from "../gsap";
+
+export const demoScalePulseV2: Demo = {
   id: "scale_pulse_v2",
   title: "SCALE_PULSE_V2",
   subtitle: "YOYO: TRUE / REPEAT: -1",
@@ -38,6 +41,11 @@ export const demoScalePulseV2 = {
     }
   ],
   getCode(params) {
+    const ringScale = Number(params.ringScale);
+    const dotScale = Number(params.dotScale);
+    const duration = Number(params.duration);
+    const ringEase = String(params.ringEase);
+    const dotEase = String(params.dotEase);
     return `// SCALE_PULSE_V2
 const stage = document.querySelector(".stage");
 stage.innerHTML = \`
@@ -50,13 +58,14 @@ stage.innerHTML = \`
   </div>\`;
 
 const tl = gsap.timeline({ repeat: -1, yoyo: true });
-tl.to(".ring", { scale: ${Number(params.ringScale)}, duration: ${Number(params.duration)}, ease: "${params.ringEase}" }, 0)
+tl.to(".ring", { scale: ${ringScale}, duration: ${duration}, ease: "${ringEase}" }, 0)
   .to(".ring", { borderStyle: "dashed", duration: 0.01 }, 0.2)
-  .to(".dot", { scale: ${Number(params.dotScale)}, duration: ${Number(params.duration)}, ease: "${params.dotEase}" }, 0);`;
+  .to(".dot", { scale: ${dotScale}, duration: ${duration}, ease: "${dotEase}" }, 0);`;
   },
   mount(el, { reduceMotion, params } = {}) {
-    const p = { ...demoScalePulseV2.defaults, ...(params ?? {}) };
-    const ctx = window.gsap.context(() => {
+    const p = { ...(demoScalePulseV2.defaults ?? {}), ...(params ?? {}) } as Record<string, unknown>;
+
+    const ctx = gsap.context(() => {
       el.innerHTML = `
         <div class="relative w-full h-full flex items-center justify-center">
           <div class="absolute w-full h-[1px] bg-outline-variant/60 top-1/2 -translate-y-1/2"></div>
@@ -69,16 +78,21 @@ tl.to(".ring", { scale: ${Number(params.ringScale)}, duration: ${Number(params.d
 
       if (reduceMotion) return;
 
-      const tl = window.gsap.timeline({ repeat: -1, yoyo: true });
+      const tl = gsap.timeline({ repeat: -1, yoyo: true });
       tl.to(
         ".ring",
         { scale: Number(p.ringScale), duration: Number(p.duration), ease: String(p.ringEase) },
         0
       )
         .to(".ring", { borderStyle: "dashed", duration: 0.01 }, 0.2)
-        .to(".dot", { scale: Number(p.dotScale), duration: Number(p.duration), ease: String(p.dotEase) }, 0);
+        .to(
+          ".dot",
+          { scale: Number(p.dotScale), duration: Number(p.duration), ease: String(p.dotEase) },
+          0
+        );
     }, el);
 
     return () => ctx.revert();
   }
 };
+

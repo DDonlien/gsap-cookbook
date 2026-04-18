@@ -1,4 +1,7 @@
-export const demoTextReveal = {
+import type { Demo } from "../types";
+import { gsap } from "../gsap";
+
+export const demoTextReveal: Demo = {
   id: "text_reveal",
   title: "TEXT_REVEAL",
   subtitle: 'TYPE: "CHARS" / STAGGER: 0.03',
@@ -28,9 +31,14 @@ export const demoTextReveal = {
     }
   ],
   getCode(params) {
+    const yFrom = Number(params.yFrom);
+    const duration = Number(params.duration);
+    const stagger = Number(params.stagger);
+    const ease = String(params.ease);
+    const text = String(params.text);
     return `// TEXT_REVEAL（不依赖 SplitText：手动包裹字符）
 const stage = document.querySelector(".stage");
-const text = "${params.text}";
+const text = "${text}";
 
 stage.innerHTML = \`
   <div class="w-full h-full flex items-center justify-center">
@@ -45,32 +53,32 @@ headline.innerHTML = text
 
 gsap.fromTo(
   ".ch",
-  { y: ${Number(params.yFrom)}, autoAlpha: 0 },
-  { y: 0, autoAlpha: 1, duration: ${Number(params.duration)}, ease: "${params.ease}", stagger: ${Number(params.stagger)} }
+  { y: ${yFrom}, autoAlpha: 0 },
+  { y: 0, autoAlpha: 1, duration: ${duration}, ease: "${ease}", stagger: ${stagger} }
 );`;
   },
   mount(el, { reduceMotion, params } = {}) {
-    const p = { ...demoTextReveal.defaults, ...(params ?? {}) };
-    const ctx = window.gsap.context(() => {
+    const p = { ...(demoTextReveal.defaults ?? {}), ...(params ?? {}) } as Record<string, unknown>;
+    const ctx = gsap.context(() => {
       const text = String(p.text ?? "GSAP REVEAL");
       el.innerHTML = `
         <div class="w-full h-full flex items-center justify-center">
           <div class="headline text-3xl font-bold tracking-tight"></div>
         </div>
       `;
-      const headline = /** @type {HTMLElement} */ (el.querySelector(".headline"));
+      const headline = el.querySelector(".headline") as HTMLElement | null;
+      if (!headline) return;
+
       headline.innerHTML = text
         .split("")
         .map((ch) =>
-          ch === " "
-            ? "<span class='inline-block w-3'></span>"
-            : `<span class="ch inline-block">${ch}</span>`
+          ch === " " ? "<span class='inline-block w-3'></span>" : `<span class="ch inline-block">${ch}</span>`
         )
         .join("");
 
       if (reduceMotion) return;
 
-      window.gsap.fromTo(
+      gsap.fromTo(
         el.querySelectorAll(".ch"),
         { y: Number(p.yFrom), autoAlpha: 0 },
         {
@@ -86,3 +94,4 @@ gsap.fromTo(
     return () => ctx.revert();
   }
 };
+

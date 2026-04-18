@@ -1,6 +1,6 @@
-# GSAP 特效展示站（H5 / 无构建）
+# GSAP 特效展示站（Vite + TypeScript）
 
-这是一个基于 **GSAP + Tailwind（CDN）** 的“特效标本库”示例站点，用于集中展示多个小型动画 demo，并支持：
+这是一个基于 **GSAP + TypeScript + Vite**（UI 仍使用 Tailwind CDN）的 demo 展示站，用于集中展示多个小型动画 demo，并支持：
 
 - 卡片预览（自动播放，遵守 `prefers-reduced-motion`）
 - 展开查看（Modal）
@@ -8,29 +8,22 @@
 
 ## 运行方式
 
-### 方式 1：直接打开
-
-直接用浏览器打开 `index.html` 即可（需要网络访问 cdnjs / Google Fonts）。
-
-### 方式 2：本地起一个静态服务器（推荐）
-
-任选其一：
-
 ```bash
-npx serve .
+npm install
+npm run dev
 ```
 
-或：
-
-```bash
-python3 -m http.server 5173
-```
-
-然后访问终端输出的地址，打开 `index.html`。
+然后按终端输出地址访问即可。
 
 ## 部署到 GitHub Pages
 
-本仓库已内置 GitHub Actions 工作流：`.github/workflows/deploy-pages.yml`，会在 `main` 分支更新时自动部署到 GitHub Pages。
+本仓库已内置 GitHub Actions 工作流：`.github/workflows/deploy-pages.yml`，会在 `main` 分支更新时自动：
+
+1. `npm ci`
+2. `npm run build`
+3. 部署 `dist/` 到 GitHub Pages
+
+同时会把页面左上角的版本号写成当前 commit 的短 SHA。
 
 你需要在 GitHub 仓库的 **Settings → Pages**：
 
@@ -43,19 +36,22 @@ python3 -m http.server 5173
 ```
 .
 ├─ index.html
-└─ js/
-   ├─ app.js
-   └─ demos/
-      ├─ index.js
-      ├─ staggerMatrix01.js
-      ├─ scalePulseV2.js
-      ├─ scrollTriggerPin.js
-      ├─ textReveal.js
-      ├─ timelineOffsetSeq.js
-      └─ gridWaveEffect.js
+├─ src/
+│  ├─ main.ts
+│  ├─ gsap.ts
+│  ├─ types.ts
+│  └─ demos/
+│     ├─ index.ts
+│     ├─ staggerMatrix01.ts
+│     ├─ scalePulseV2.ts
+│     ├─ scrollTriggerPin.ts
+│     ├─ textReveal.ts
+│     ├─ timelineOffsetSeq.ts
+│     └─ gridWaveEffect.ts
+└─ vite.config.ts
 ```
 
 ## 添加新 Demo
 
-1. 在 `js/demos/` 新增一个 `xxx.js`，导出 `{ id, title, subtitle, tags, code, mount() }`
-2. 在 `js/demos/index.js` 里引入并加入 `demos` 数组
+1. 在 `src/demos/` 新增一个 `xxx.ts`，导出 `Demo`
+2. 在 `src/demos/index.ts` 里引入并加入 `demos` 数组

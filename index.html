@@ -76,9 +76,7 @@
       rel="stylesheet"
     />
 
-    <!-- GSAP (CDN) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <!-- GSAP 改为项目依赖（TypeScript 版本通过 Vite 打包引入） -->
 
     <style>
       body {
@@ -127,6 +125,24 @@
         <span class="text-[8px] text-outline tracking-widest" id="repoVersion" title="仓库版本（如有）"
           >UNVERSIONED</span
         >
+        <div class="mt-1 flex border-[0.5px] border-outline-variant bg-surface" id="langSwitch">
+          <button
+            id="langZh"
+            type="button"
+            class="h-6 w-10 text-[9px] font-bold tracking-widest border-r-[0.5px] border-outline-variant hover:bg-surface-container-high transition-colors"
+            title="中文"
+          >
+            中文
+          </button>
+          <button
+            id="langEn"
+            type="button"
+            class="h-6 w-10 text-[9px] font-bold tracking-widest hover:bg-surface-container-high transition-colors"
+            title="English"
+          >
+            EN
+          </button>
+        </div>
       </div>
       <!-- Main Tabs (仅展示，不做复杂路由) -->
       <div class="flex-1 flex flex-col">
@@ -172,12 +188,13 @@
           <h1 class="text-xl font-bold tracking-tight uppercase text-on-surface">GSAP COOKBOOK</h1>
         </div>
         <!-- Search + Sorting (no outer spacing, 2 rows) -->
-        <div class="flex-1 h-full flex flex-col overflow-hidden">
+        <div class="flex-1 h-full flex flex-col">
           <!-- Row 1: Search -->
           <div class="flex-1 border-b-[0.5px] border-outline-variant">
             <input
               id="searchInput"
               class="w-full h-full px-4 bg-surface text-on-surface text-xs font-mono outline-none"
+              data-i18n-placeholder="searchPlaceholder"
               placeholder="搜索"
               type="text"
               autocomplete="off"
@@ -185,7 +202,7 @@
           </div>
           <!-- Row 2: Sorting -->
           <div class="flex-1 overflow-hidden">
-            <div id="tagFilters" class="w-full h-full flex items-stretch overflow-x-auto"></div>
+            <div id="tagFilters" class="w-full h-full flex items-stretch"></div>
           </div>
         </div>
         <div class="flex h-full">
@@ -194,7 +211,7 @@
             type="button"
             id="btnReset"
           >
-            RESET
+            <span data-i18n="reset">重置</span>
           </button>
         </div>
       </header>
@@ -203,12 +220,14 @@
       <main class="flex-1 overflow-y-auto bg-surface relative">
         <div
           id="galleryGrid"
-          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-0 w-full"
+          class="grid grid-cols-1 min-[520px]:grid-cols-2 xl:grid-cols-4 gap-0 w-full"
         ></div>
         <div
           class="h-16 w-full border-t-[0.5px] border-outline-variant bg-surface flex items-center justify-center"
         >
-          <span class="text-[10px] text-outline font-bold tracking-widest uppercase">END OF COOKBOOK</span>
+          <span class="text-[10px] text-outline font-bold tracking-widest uppercase" data-i18n="endText"
+            >END OF COOKBOOK</span
+          >
         </div>
       </main>
     </div>
@@ -228,11 +247,19 @@
           </div>
           <div class="flex items-center gap-2">
             <button
+              class="h-9 w-9 flex items-center justify-center border-[0.5px] border-outline-variant hover:bg-primary hover:text-on-primary transition-colors"
+              id="btnReplay"
+              type="button"
+              title="重播"
+            >
+              <span class="material-symbols-outlined text-base">replay</span>
+            </button>
+            <button
               class="h-9 px-3 border-[0.5px] border-outline-variant hover:bg-primary hover:text-on-primary transition-colors text-xs font-bold tracking-widest uppercase"
               id="btnCopy"
               type="button"
             >
-              COPY CODE
+              <span data-i18n="copyCode">复制代码</span>
             </button>
             <button
               class="h-9 w-9 flex items-center justify-center border-[0.5px] border-outline-variant hover:bg-on-surface hover:text-surface transition-colors"
@@ -249,35 +276,41 @@
         <!-- Layout:
              - < md: stage / params / code 纵向
              - >= md: stage | params 左右，code 在下面跨两列 -->
-        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 md:grid-rows-[minmax(0,1fr)_minmax(0,1fr)] overflow-hidden">
+        <div
+          class="flex-1 grid grid-cols-1 min-[520px]:grid-cols-2 min-[520px]:grid-rows-[minmax(0,1fr)_minmax(0,1fr)] overflow-hidden"
+        >
           <!-- Stage -->
-          <div class="border-b-[0.5px] md:border-b-0 md:border-r-[0.5px] border-outline-variant bg-surface-container-low">
+          <div
+            class="border-b-[0.5px] min-[520px]:border-b-0 min-[520px]:border-r-[0.5px] border-outline-variant bg-surface-container-low"
+          >
             <div id="modalStage" class="demo-stage"></div>
           </div>
 
           <!-- Controls -->
-          <div class="bg-surface overflow-hidden flex flex-col border-b-[0.5px] md:border-b-0 border-outline-variant">
+          <div class="bg-surface overflow-hidden flex flex-col border-b-[0.5px] min-[520px]:border-b-0 border-outline-variant">
             <div class="h-12 px-4 flex items-center justify-between border-b-[0.5px] border-outline-variant">
-              <div class="text-[10px] font-mono uppercase tracking-widest text-outline">PARAMETERS</div>
+              <div class="text-[10px] font-mono uppercase tracking-widest text-outline" data-i18n="parameters">
+                参数
+              </div>
               <button
                 class="h-8 px-3 border-[0.5px] border-outline-variant hover:bg-surface-container-high transition-colors text-[10px] font-bold tracking-widest uppercase"
                 id="btnResetParams"
                 type="button"
               >
-                RESET PARAMS
+                <span data-i18n="resetParams">重置参数</span>
               </button>
             </div>
-            <div id="modalControls" class="flex-1 overflow-auto px-4 py-4 grid grid-cols-1 md:grid-cols-1 gap-3"></div>
+            <div id="modalControls" class="flex-1 overflow-auto px-4 py-4 grid grid-cols-1 gap-3"></div>
           </div>
 
           <!-- Code (span 2 columns on md+) -->
-          <div class="bg-surface overflow-auto md:col-span-2 md:border-t-[0.5px] border-outline-variant">
+          <div class="bg-surface overflow-auto min-[520px]:col-span-2 min-[520px]:border-t-[0.5px] border-outline-variant">
             <pre class="p-4 text-[12px] leading-5 overflow-auto font-mono whitespace-pre"><code id="modalCode"></code></pre>
           </div>
         </div>
       </div>
     </div>
 
-    <script type="module" src="./js/app.js"></script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
