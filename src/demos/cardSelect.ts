@@ -9,7 +9,6 @@ export const demoCardSelect: Demo = {
   id: "card_select",
   title: "CARD_SELECT",
   subtitle: "CLICK / LIFT / DIM OTHERS",
-  tags: { playback: ["interactive"], type: ["card", "ui", "feedback"], related: ["mouse"] },
   defaults: {
     count: 6,
     selectMode: "single",

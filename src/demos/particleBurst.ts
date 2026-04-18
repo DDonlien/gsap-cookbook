@@ -5,7 +5,6 @@ export const demoParticleBurst: Demo = {
   id: "particle_burst",
   title: "PARTICLE_BURST",
   subtitle: "BURST / SPARKS",
-  tags: { playback: ["once"], type: ["feedback", "particles"], related: [] },
   defaults: {
     count: 18,
     distance: 140,
@@ -98,4 +97,3 @@ for (let i = 0; i < ${count}; i++) {
     return () => ctx.revert();
   }
 };
-

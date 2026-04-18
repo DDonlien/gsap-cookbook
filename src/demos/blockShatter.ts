@@ -13,7 +13,6 @@ export const demoBlockShatter: Demo = {
   id: "block_shatter",
   title: "BLOCK_SHATTER",
   subtitle: "FRAGMENTS / DISAPPEAR",
-  tags: { playback: ["interactive"], type: ["feedback", "ui"], related: ["mouse"] },
   defaults: {
     grid: 6,
     power: 140,

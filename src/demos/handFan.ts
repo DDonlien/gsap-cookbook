@@ -9,7 +9,6 @@ export const demoHandFan: Demo = {
   id: "hand_fan",
   title: "HAND_FAN",
   subtitle: "FAN / OPEN-CLOSE",
-  tags: { playback: ["interactive"], type: ["card", "ui"], related: ["mouse"] },
   defaults: {
     count: 8,
     open: 1,

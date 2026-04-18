@@ -9,7 +9,6 @@ export const demoBlockMelt: Demo = {
   id: "block_melt",
   title: "BLOCK_MELT",
   subtitle: "SQUASH / DRIP / FADE",
-  tags: { playback: ["interactive"], type: ["feedback", "ui"], related: ["mouse"] },
   defaults: {
     duration: 0.9,
     dripCount: 10,

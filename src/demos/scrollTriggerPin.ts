@@ -5,7 +5,6 @@ export const demoScrollTriggerPin: Demo = {
   id: "scroll_trigger_pin",
   title: "SCROLL_TRIGGER_PIN",
   subtitle: "SCRUB: 1 / PIN: TRUE",
-  tags: { playback: ["interactive"], type: ["scroll", "pin"], related: ["scroll"] },
   defaults: {
     startPercent: 30,
     end: 260,
@@ -82,4 +81,3 @@ ScrollTrigger.create({
     return () => ctx.revert();
   }
 };
-

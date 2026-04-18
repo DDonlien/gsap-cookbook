@@ -5,7 +5,6 @@ export const demoBannerPop: Demo = {
   id: "banner_pop",
   title: "BANNER_POP",
   subtitle: "BIG TEXT / SQUASH-STRETCH",
-  tags: { playback: ["once"], type: ["feedback", "ui"], related: [] },
   defaults: {
     text: "COMBO!",
     duration: 0.7,

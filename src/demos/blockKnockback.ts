@@ -9,7 +9,6 @@ export const demoBlockKnockback: Demo = {
   id: "block_knockback",
   title: "BLOCK_KNOCKBACK",
   subtitle: "HIT / KICK / RECOIL",
-  tags: { playback: ["interactive"], type: ["feedback", "ui"], related: ["mouse"] },
   defaults: {
     dash: 110,
     knock: 170,

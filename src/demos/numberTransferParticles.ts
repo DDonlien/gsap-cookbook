@@ -19,7 +19,6 @@ export const demoNumberTransferParticles: Demo = {
   id: "number_transfer_particles",
   title: "NUMBER_TRANSFER",
   subtitle: "PARTICLES → UPDATE",
-  tags: { playback: ["interactive"], type: ["ui", "particles", "feedback"], related: ["mouse"] },
   defaults: {
     left: 1200,
     right: 250,

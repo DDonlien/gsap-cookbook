@@ -5,7 +5,6 @@ export const demoScalePulseV2: Demo = {
   id: "scale_pulse_v2",
   title: "SCALE_PULSE_V2",
   subtitle: "YOYO: TRUE / REPEAT: -1",
-  tags: { playback: ["loop"], type: ["scale", "pulse"], related: [] },
   defaults: {
     ringScale: 2.6,
     dotScale: 1.8,
@@ -95,4 +94,3 @@ tl.to(".ring", { scale: ${ringScale}, duration: ${duration}, ease: "${ringEase}"
     return () => ctx.revert();
   }
 };
-

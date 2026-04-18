@@ -5,7 +5,6 @@ export const demoScreenShake: Demo = {
   id: "screen_shake",
   title: "SCREEN_SHAKE",
   subtitle: "HIT / SHAKE",
-  tags: { playback: ["once"], type: ["feedback", "shake"], related: [] },
   defaults: {
     intensity: 12,
     shakes: 10,
@@ -71,4 +70,3 @@ tl.to(frame, { x: 0, y: 0, duration: 0.12, ease: "power2.out" });`;
     return () => ctx.revert();
   }
 };
-

@@ -5,7 +5,6 @@ export const demoTextReveal: Demo = {
   id: "text_reveal",
   title: "TEXT_REVEAL",
   subtitle: 'TYPE: "CHARS" / STAGGER: 0.03',
-  tags: { playback: ["once"], type: ["reveal", "text"], related: ["text"] },
   defaults: {
     yFrom: 20,
     duration: 0.6,
@@ -94,4 +93,3 @@ gsap.fromTo(
     return () => ctx.revert();
   }
 };
-

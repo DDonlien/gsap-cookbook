@@ -5,7 +5,6 @@ export const demoTimelineOffsetSeq: Demo = {
   id: "timeline_offset_seq",
   title: "TIMELINE_OFFSET_SEQ",
   subtitle: 'POSITION: "<=0.2" / OVERLAP',
-  tags: { playback: ["loop"], type: ["timeline"], related: [] },
   defaults: {
     duration: 0.6,
     overlap: 0.2,
@@ -94,4 +93,3 @@ tl.fromTo(".bar1", { x: -${amp1} }, { x: ${amp1}, duration: ${duration}, ease: "
     return () => ctx.revert();
   }
 };
-

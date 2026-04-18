@@ -5,7 +5,6 @@ export const demoGlowPulse: Demo = {
   id: "glow_pulse",
   title: "GLOW_PULSE",
   subtitle: "NEON / LOOP",
-  tags: { playback: ["loop"], type: ["card", "ui"], related: [] },
   defaults: {
     color: "#1049f1",
     duration: 1.3,

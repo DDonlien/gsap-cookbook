@@ -5,24 +5,39 @@ export const demoHoverTilt: Demo = {
   id: "hover_tilt",
   title: "HOVER_TILT",
   subtitle: "MOUSE TILT / GLOW",
-  tags: { playback: ["interactive"], type: ["ui", "hover"], related: ["mouse"] },
   defaults: {
     maxTilt: 14,
     glow: 0.35,
+    glowOverflow: "clip",
     duration: 0.25
   },
   controls: [
     { key: "maxTilt", label: "maxTilt(deg)", type: "range", min: 0, max: 30, step: 1 },
     { key: "glow", label: "glow", type: "range", min: 0, max: 1, step: 0.05 },
+    {
+      key: "glowOverflow",
+      label: "glowOverflow",
+      type: "select",
+      options: [
+        { label: "clip(裁切)", value: "clip" },
+        { label: "overflow(溢出可见)", value: "overflow" }
+      ]
+    },
     { key: "duration", label: "duration", type: "range", min: 0, max: 0.8, step: 0.05 }
   ],
   getCode(params) {
     const maxTilt = Number(params.maxTilt);
     const glow = Number(params.glow);
+    const glowOverflow = String(params.glowOverflow);
     const duration = Number(params.duration);
     return `// HOVER_TILT（最初版：角落高光 + 轻微错位）
 const card = document.querySelector(".card");
 const glowEl = document.querySelector(".glow");
+
+// glowOverflow:
+// - clip: overflow-hidden（不允许超出卡牌边界）
+// - overflow: overflow-visible（允许 glow 溢出卡牌边界）
+card.style.overflow = "${glowOverflow === "overflow" ? "visible" : "hidden"}";
 
 card.addEventListener("pointermove", (e) => {
   const r = card.getBoundingClientRect();
@@ -48,13 +63,17 @@ card.addEventListener("pointerleave", () => {
     const p = { ...(demoHoverTilt.defaults ?? {}), ...(params ?? {}) } as Record<string, unknown>;
     const maxTilt = Number(p.maxTilt);
     const glow = Number(p.glow);
+    const glowOverflow = String(p.glowOverflow);
     const duration = Number(p.duration);
 
     const ctx = gsap.context(() => {
+      const cardOverflowClass = glowOverflow === "overflow" ? "overflow-visible" : "overflow-hidden";
+      const glowInsetClass = glowOverflow === "overflow" ? "-inset-10 blur-lg" : "inset-0";
+
       el.innerHTML = `
         <div class="w-full h-full flex items-center justify-center p-8 [perspective:900px]">
-          <div class="card relative w-[180px] h-[240px] border border-outline-variant bg-surface shadow-sm [transform-style:preserve-3d] overflow-hidden">
-            <div class="absolute inset-0 pointer-events-none glow opacity-0 bg-gradient-to-br from-primary/40 via-transparent to-transparent"></div>
+          <div class="card relative w-[180px] h-[240px] border border-outline-variant bg-surface shadow-sm [transform-style:preserve-3d] ${cardOverflowClass}">
+            <div class="glow pointer-events-none opacity-0 absolute ${glowInsetClass} bg-gradient-to-br from-primary/40 via-transparent to-transparent"></div>
             <div class="absolute top-2 left-2 text-[10px] font-mono tracking-widest text-outline">HOVER</div>
             <div class="absolute inset-0 flex items-center justify-center">
               <div class="text-3xl font-bold tracking-tight">J</div>
@@ -103,4 +122,3 @@ card.addEventListener("pointerleave", () => {
     };
   }
 };
-

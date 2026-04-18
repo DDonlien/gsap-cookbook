@@ -5,7 +5,6 @@ export const demoDropShadow: Demo = {
   id: "drop_shadow",
   title: "DROP_SHADOW",
   subtitle: "TILT / PROJECTED SHADOW",
-  tags: { playback: ["interactive"], type: ["ui", "shadow"], related: ["mouse"] },
   defaults: {
     maxTilt: 14,
     maxOffset: 34,

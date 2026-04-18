@@ -9,7 +9,6 @@ export const demoCardDeal: Demo = {
   id: "card_deal",
   title: "CARD_DEAL",
   subtitle: "DEAL / STAGGER / ARC",
-  tags: { playback: ["once"], type: ["card", "deal"], related: [] },
   defaults: {
     count: 7,
     sourceX: -180,

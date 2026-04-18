@@ -1,6 +1,9 @@
+import "./styles/fonts.css";
+
 import type { Control, Demo } from "./types";
 import { demos } from "./demos";
 import { gsap } from "./gsap";
+import { getDemoTags } from "./demoTags";
 
 const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
 
@@ -12,6 +15,7 @@ const $modalSubTitle = document.getElementById("modalSubTitle") as HTMLElement |
 const $modalCode = document.getElementById("modalCode") as HTMLElement | null;
 const $btnCopy = document.getElementById("btnCopy") as HTMLButtonElement | null;
 const $btnReplay = document.getElementById("btnReplay") as HTMLButtonElement | null;
+const $btnAction = document.getElementById("btnAction") as HTMLButtonElement | null;
 const $modalControls = document.getElementById("modalControls") as HTMLElement | null;
 const $btnResetParams = document.getElementById("btnResetParams") as HTMLButtonElement | null;
 const $tagFilters = document.getElementById("tagFilters") as HTMLElement | null;
@@ -25,7 +29,8 @@ const I18N: Record<Lang, Record<string, string>> = {
   zh: {
     searchPlaceholder: "搜索",
     filterPlayback: "播放状态",
-    filterType: "动画类",
+    filterType: "表现类型",
+    filterTarget: "对象",
     clear: "清空",
     close: "关闭",
     reset: "重置",
@@ -39,7 +44,8 @@ const I18N: Record<Lang, Record<string, string>> = {
   en: {
     searchPlaceholder: "Search",
     filterPlayback: "Playback",
-    filterType: "Type",
+    filterType: "Style",
+    filterTarget: "Target",
     clear: "Clear",
     close: "Close",
     reset: "Reset",
@@ -674,6 +680,10 @@ function applyI18n() {
     $langEn.classList.toggle(inactiveOn, lang !== "en");
     $langEn.classList.toggle(inactiveText, lang !== "en");
   }
+
+  // 根据语言切换字体（字体加载失败会自然回退到系统字体）
+  document.body.dataset.lang = lang;
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
 }
 
 function setLang(next: Lang) {
@@ -916,13 +926,33 @@ function openModal(id: string) {
 
   // once 动画支持重播按钮
   if ($btnReplay) {
-    const isOnce = demo.tags.playback.includes("once");
+    const isOnce = getDemoTags(demo.id).playback.includes("once");
     $btnReplay.style.display = isOnce ? "" : "none";
     $btnReplay.title = t("replay");
     $btnReplay.onclick = () => {
       // 重新 mount 即可重播
       rerenderModal();
     };
+  }
+
+  // 可选动作按钮（不侵入舞台）
+  if ($btnAction) {
+    const action = demo.action;
+    $btnAction.style.display = action ? "" : "none";
+    if (action) {
+      const icon = $btnAction.querySelector("[data-icon]") as HTMLElement | null;
+      const label = $btnAction.querySelector("[data-label]") as HTMLElement | null;
+      if (icon) icon.textContent = action.icon;
+      if (label) label.textContent = action.label;
+      $btnAction.title = action.label;
+      $btnAction.onclick = () => {
+        const host = $modalStage as any;
+        if (typeof host?.__action === "function") host.__action();
+        else rerenderModal();
+      };
+    } else {
+      $btnAction.onclick = null;
+    }
   }
 
   modalCleanup?.();
@@ -969,6 +999,16 @@ function createCard(demo: Demo) {
   el.className =
     "group flex flex-col h-[480px] border-b-[0.5px] border-r-[0.5px] border-outline-variant relative bg-surface";
 
+  const actionHtml = demo.action
+    ? `<div class="ml-3 shrink-0 flex items-center gap-2">
+         <button class="h-9 px-3 flex items-center justify-center gap-2 border-[0.5px] border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary transition-colors"
+           title="${escapeHtml(demo.action.label)}" data-action="action" type="button">
+           <span class="material-symbols-outlined text-base">${escapeHtml(demo.action.icon)}</span>
+           <span class="text-[10px] font-mono uppercase tracking-widest">${escapeHtml(demo.action.label)}</span>
+         </button>
+       </div>`
+    : "";
+
   el.innerHTML = `
     <div class="absolute top-4 right-4 flex gap-0 border-[0.5px] border-outline-variant opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-surface">
       <button class="w-10 h-10 flex items-center justify-center border-r-[0.5px] border-outline-variant hover:bg-primary hover:text-surface transition-colors" title="复制代码" data-action="copy">
@@ -991,15 +1031,18 @@ function createCard(demo: Demo) {
           demo.subtitle
         )}</p>
       </div>
-      ${
-        demo.tags.playback.includes("once")
-          ? `<button class="ml-3 shrink-0 w-9 h-9 flex items-center justify-center border-[0.5px] border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary transition-colors" title="${escapeHtml(
-              t("replay")
-            )}" data-action="replay">
-                <span class="material-symbols-outlined text-base">replay</span>
-              </button>`
-          : ""
-      }
+      <div class="flex items-center justify-end">
+        ${actionHtml}
+        ${
+          getDemoTags(demo.id).playback.includes("once")
+            ? `<button class="ml-3 shrink-0 w-9 h-9 flex items-center justify-center border-[0.5px] border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary transition-colors" title="${escapeHtml(
+                t("replay")
+              )}" data-action="replay" type="button">
+                  <span class="material-symbols-outlined text-base">replay</span>
+                </button>`
+            : ""
+        }
+      </div>
     </div>
   `;
 
@@ -1012,6 +1055,19 @@ function createCard(demo: Demo) {
       copyText(getDemoCode(demo, params));
     }
     if (action === "expand") openModal(demo.id);
+    if (action === "action") {
+      const stage = el.querySelector("[data-preview]") as any;
+      if (typeof stage?.__action === "function") stage.__action();
+      else {
+        // fallback：重挂载一次
+        const host = el.querySelector("[data-preview]") as HTMLElement | null;
+        if (!host) return;
+        previewCleanup.get(demo.id)?.();
+        host.innerHTML = "";
+        const cleanup = demo.mount(host, { reduceMotion, mode: "preview" });
+        previewCleanup.set(demo.id, cleanup);
+      }
+    }
     if (action === "replay") {
       const stage = el.querySelector("[data-preview]") as HTMLElement | null;
       if (!stage) return;
@@ -1052,16 +1108,24 @@ function renderGallery(list: Demo[]) {
 const filterState = {
   playback: new Set<string>(),
   type: new Set<string>(),
+  target: new Set<string>(),
   related: new Set<string>(),
   q: ""
 };
 
 function collectTagOptions() {
-  const opts = { playback: new Set<string>(), type: new Set<string>(), related: new Set<string>() };
+  const opts = {
+    playback: new Set<string>(),
+    type: new Set<string>(),
+    target: new Set<string>(),
+    related: new Set<string>()
+  };
   for (const d of demos) {
-    d.tags.playback.forEach((x) => opts.playback.add(x));
-    d.tags.type.forEach((x) => opts.type.add(x));
-    d.tags.related.forEach((x) => opts.related.add(x));
+    const tags = getDemoTags(d.id);
+    tags.playback.forEach((x) => opts.playback.add(x));
+    tags.type.forEach((x) => opts.type.add(x));
+    tags.target.forEach((x) => opts.target.add(x));
+    tags.related.forEach((x) => opts.related.add(x));
   }
   return opts;
 }
@@ -1069,7 +1133,7 @@ function collectTagOptions() {
 let activePanel:
   | null
   | {
-      key: "playback" | "type";
+      key: "playback" | "type" | "target";
       anchor: HTMLElement;
       panel: HTMLElement;
       onClose: () => void;
@@ -1086,7 +1150,7 @@ function updateTagButtons() {
   if (!$tagFilters) return;
   $tagFilters.querySelectorAll("[data-tag-btn]").forEach((btn) => {
     if (!(btn instanceof HTMLButtonElement)) return;
-    const key = btn.dataset.key as "playback" | "type";
+    const key = btn.dataset.key as "playback" | "type" | "target";
     const activeCount = filterState[key]?.size ?? 0;
     btn.classList.toggle("bg-on-surface", activeCount > 0);
     btn.classList.toggle("text-surface", activeCount > 0);
@@ -1097,7 +1161,7 @@ function updateTagButtons() {
   });
 }
 
-function openPanel(key: "playback" | "type", anchor: HTMLElement, values: string[]) {
+function openPanel(key: "playback" | "type" | "target", anchor: HTMLElement, values: string[]) {
   closePanel();
 
   const panel = document.createElement("div");
@@ -1198,8 +1262,9 @@ function renderTagFilters() {
   const opts = collectTagOptions();
   $tagFilters.innerHTML = "";
 
-  const groups: { key: "playback" | "type"; label: string; values: string[] }[] = [
+  const groups: { key: "playback" | "type" | "target"; label: string; values: string[] }[] = [
     { key: "playback", label: t("filterPlayback"), values: Array.from(opts.playback).sort() },
+    { key: "target", label: t("filterTarget"), values: Array.from(opts.target).sort() },
     { key: "type", label: t("filterType"), values: Array.from(opts.type).sort() }
   ];
 
@@ -1242,14 +1307,15 @@ function renderTagFilters() {
 }
 
 function matchTags(demo: Demo) {
-  const hit = (key: "playback" | "type" | "related") => {
+  const tags = getDemoTags(demo.id);
+  const hit = (key: "playback" | "type" | "target" | "related") => {
     const selected = filterState[key];
     if (selected.size === 0) return true;
-    const own = new Set(demo.tags[key]);
+    const own = new Set((tags as any)[key] ?? []);
     for (const s of selected) if (own.has(s)) return true;
     return false;
   };
-  return hit("playback") && hit("type") && hit("related");
+  return hit("playback") && hit("target") && hit("type") && hit("related");
 }
 
 function matchSearch(demo: Demo) {
@@ -1268,6 +1334,7 @@ function bindTopbar() {
   document.getElementById("btnReset")?.addEventListener("click", () => {
     filterState.playback.clear();
     filterState.type.clear();
+    filterState.target.clear();
     filterState.related.clear();
     filterState.q = "";
     if ($searchInput) $searchInput.value = "";

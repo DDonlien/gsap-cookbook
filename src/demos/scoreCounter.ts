@@ -5,7 +5,6 @@ export const demoScoreCounter: Demo = {
   id: "score_counter",
   title: "SCORE_COUNTER",
   subtitle: "COUNTER / POP",
-  tags: { playback: ["once"], type: ["ui", "counter"], related: [] },
   defaults: {
     from: 1200,
     to: 3450,

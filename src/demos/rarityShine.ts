@@ -5,7 +5,6 @@ export const demoRarityShine: Demo = {
   id: "rarity_shine",
   title: "RARITY_SHINE",
   subtitle: "LOOP / SWEEP",
-  tags: { playback: ["loop"], type: ["card", "shine"], related: [] },
   defaults: {
     duration: 1.6,
     angle: -20,
@@ -56,4 +55,3 @@ gsap.to(".shine", { xPercent: 160, duration: ${duration}, ease: "none", repeat: 
     return () => ctx.revert();
   }
 };
-

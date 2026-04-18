@@ -5,7 +5,6 @@ export const demoCardFlip: Demo = {
   id: "card_flip",
   title: "CARD_FLIP",
   subtitle: "3D FLIP / CLICK",
-  tags: { playback: ["interactive"], type: ["card", "flip"], related: ["mouse"] },
   defaults: {
     trigger: "click",
     duration: 0.6,

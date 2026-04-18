@@ -9,7 +9,6 @@ export const demoBlockSwallow: Demo = {
   id: "block_swallow",
   title: "BLOCK_SWALLOW",
   subtitle: "EAT / SCALE / VANISH",
-  tags: { playback: ["interactive"], type: ["feedback", "ui"], related: ["mouse"] },
   defaults: {
     duration: 0.85,
     zoom: 1.28,

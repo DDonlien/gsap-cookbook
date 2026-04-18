@@ -15,6 +15,15 @@ export type Control = {
 export type TagGroups = {
   playback: string[];
   type: string[];
+  /** 对象/目标：例如 card / text / mouse 等，可多选（可缺省以兼容旧 demo） */
+  target?: string[];
+  related: string[];
+};
+
+export type DemoTags = {
+  playback: string[];
+  target: string[];
+  type: string[];
   related: string[];
 };
 
@@ -30,12 +39,12 @@ export type Demo = {
   id: string;
   title: string;
   subtitle: string;
-  tags: TagGroups;
   defaults?: Record<string, unknown>;
   controls?: Control[];
+  /** 预览卡片/弹窗右上角的“动作按钮”（不侵入 demo 舞台） */
+  action?: { icon: string; label: string };
   getCode?: (params: Record<string, unknown>) => string;
   mount: (el: HTMLElement, opts?: DemoMountOptions) => () => void;
   /** 兼容旧字段 */
   code?: string;
 };
-

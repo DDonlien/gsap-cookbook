@@ -13,7 +13,6 @@ export const demoNumberAddFx: Demo = {
   id: "number_add_fx",
   title: "NUMBER_ADD_FX",
   subtitle: "ROLL / SHAKE / FLASH",
-  tags: { playback: ["interactive"], type: ["ui", "feedback"], related: ["mouse"] },
   defaults: {
     base: 1250,
     minAdd: 25,

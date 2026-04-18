@@ -41,7 +41,6 @@ export const demoPkShakePack: Demo = {
   id: "pk_shake_pack",
   title: "PK_SHAKE_PACK",
   subtitle: "HIT / CRIT / MISS / STUN",
-  tags: { playback: ["interactive"], type: ["feedback", "ui"], related: ["mouse"] },
   defaults: {
     preset: "hit",
     intensity: 14,

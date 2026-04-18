@@ -5,7 +5,6 @@ export const demoGridWaveEffect: Demo = {
   id: "grid_wave_effect",
   title: "GRID_WAVE_EFFECT",
   subtitle: 'STAGGER: { GRID: "AUTO", FROM: "CENTER" }',
-  tags: { playback: ["loop"], type: ["stagger", "grid"], related: [] },
   defaults: {
     scale: 0.3,
     duration: 0.6,
@@ -86,4 +85,3 @@ gsap.to(cells, {
     return () => ctx.revert();
   }
 };
-

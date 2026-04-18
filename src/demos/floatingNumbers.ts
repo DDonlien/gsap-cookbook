@@ -9,7 +9,6 @@ export const demoFloatingNumbers: Demo = {
   id: "floating_numbers",
   title: "FLOATING_NUMBERS",
   subtitle: "POP / RISE / FADE",
-  tags: { playback: ["interactive"], type: ["feedback", "ui"], related: ["mouse"] },
   defaults: {
     duration: 0.75,
     rise: 56,

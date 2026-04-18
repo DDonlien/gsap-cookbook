@@ -5,7 +5,6 @@ export const demoStaggerMatrix01: Demo = {
   id: "stagger_matrix_01",
   title: "STAGGER_MATRIX_01",
   subtitle: "GRID: [10,10] / EASE: SINE.INOUT",
-  tags: { playback: ["loop"], type: ["stagger", "grid"], related: [] },
   defaults: {
     duration: 0.8,
     each: 0.01,
@@ -86,4 +85,3 @@ gsap.fromTo(
     return () => ctx.revert();
   }
 };
-
