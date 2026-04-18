@@ -120,12 +120,18 @@
       class="w-20 h-full flex flex-col border-r-[0.5px] border-outline-variant bg-surface shrink-0 z-20"
     >
       <!-- Header -->
-      <div class="h-16 flex flex-col items-center justify-center border-b-[0.5px] border-outline-variant">
-        <span class="text-[10px] font-bold tracking-widest uppercase">COOKBOOK</span>
-        <span class="text-[8px] text-outline tracking-widest" id="repoVersion" title="仓库版本（如有）"
-          >UNVERSIONED</span
+      <div class="h-20 relative flex flex-col items-center border-b-[0.5px] border-outline-variant">
+        <div class="pt-3 flex flex-col items-center justify-center">
+          <span class="text-[10px] font-bold tracking-widest uppercase">COOKBOOK</span>
+          <span class="text-[8px] text-outline tracking-widest" id="repoVersion" title="仓库版本（如有）"
+            >UNVERSIONED</span
+          >
+        </div>
+        <!-- 让语言切换 box 底边与右侧 TopNavBar 的底边对齐 -->
+        <div
+          class="absolute bottom-0 left-1/2 -translate-x-1/2 flex border-[0.5px] border-outline-variant border-b-0 bg-surface"
+          id="langSwitch"
         >
-        <div class="mt-1 flex border-[0.5px] border-outline-variant bg-surface" id="langSwitch">
           <button
             id="langZh"
             type="button"
