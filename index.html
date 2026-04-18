@@ -171,20 +171,21 @@
         <div class="h-full px-6 flex items-center border-r-[0.5px] border-outline-variant">
           <h1 class="text-xl font-bold tracking-tight uppercase text-on-surface">GSAP COOKBOOK</h1>
         </div>
-        <div class="flex-1 h-full px-4 flex flex-col overflow-hidden">
-          <!-- Row 1: Search (full width, half height) -->
-          <div class="flex-1 flex items-center">
+        <!-- Search + Sorting (no outer spacing, 2 rows) -->
+        <div class="flex-1 h-full flex flex-col overflow-hidden">
+          <!-- Row 1: Search -->
+          <div class="flex-1 border-b-[0.5px] border-outline-variant">
             <input
               id="searchInput"
-              class="h-9 w-full px-3 border-[0.5px] border-outline-variant bg-surface text-on-surface text-xs font-mono"
-              placeholder="搜索：按名称 / id / 描述…"
+              class="w-full h-full px-4 bg-surface text-on-surface text-xs font-mono outline-none"
+              placeholder="搜索"
               type="text"
               autocomplete="off"
             />
           </div>
-          <!-- Row 2: Tag dropdowns -->
-          <div class="flex-1 flex items-center overflow-hidden">
-            <div id="tagFilters" class="flex items-center gap-3 overflow-x-auto pr-2"></div>
+          <!-- Row 2: Sorting -->
+          <div class="flex-1 overflow-hidden">
+            <div id="tagFilters" class="w-full h-full flex items-stretch overflow-x-auto"></div>
           </div>
         </div>
         <div class="flex h-full">

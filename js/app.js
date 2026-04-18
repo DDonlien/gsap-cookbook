@@ -258,26 +258,50 @@ function renderTagFilters() {
   /** @type {{ key: "playback"|"type"|"related"; label: string; values: string[] }[]} */
   const groups = [
     { key: "playback", label: "播放状态", values: Array.from(opts.playback).sort() },
-    { key: "type", label: "动画类型", values: Array.from(opts.type).sort() },
-    { key: "related", label: "相关性", values: Array.from(opts.related).sort() }
+    { key: "type", label: "动画类", values: Array.from(opts.type).sort() }
   ];
 
-  for (const g of groups) {
+  for (let i = 0; i < groups.length; i++) {
+    const g = groups[i];
     const details = document.createElement("details");
-    details.className = "relative shrink-0";
+    details.className = "relative shrink-0 h-full";
 
     const activeCount = filterState[g.key].size;
+    const summaryClass = [
+      "h-full",
+      "px-4",
+      "flex",
+      "items-center",
+      "justify-between",
+      ...(i === groups.length - 1
+        ? []
+        : ["border-r-[0.5px]", "border-outline-variant"]),
+      "text-xs",
+      "font-mono",
+      "uppercase",
+      "tracking-widest",
+      "select-none",
+      "cursor-pointer",
+      "transition-colors",
+      activeCount > 0 ? "bg-on-surface text-surface" : "bg-surface text-on-surface hover:bg-surface-container-high"
+    ].join(" ");
+
     details.innerHTML = `
-      <summary class="${chipClass(activeCount > 0)} list-none cursor-pointer select-none flex items-center gap-2">
-        <span>${escapeHtml(g.label)}</span>
-        <span class="text-[9px] font-mono opacity-70">${activeCount ? `(${activeCount})` : ""}</span>
-        <span class="material-symbols-outlined text-sm opacity-70">expand_more</span>
+      <summary class="${summaryClass} list-none">
+        <span class="truncate">${escapeHtml(g.label)}</span>
+        <span class="flex items-center gap-2">
+          <span class="text-[10px] opacity-70">${activeCount ? `${activeCount}` : ""}</span>
+          <span class="material-symbols-outlined text-base opacity-70">expand_more</span>
+        </span>
       </summary>
-      <div class="absolute left-0 mt-2 w-56 border-[0.5px] border-outline-variant bg-surface shadow-sm z-20">
-        <div class="max-h-56 overflow-auto p-2" data-options></div>
-        <div class="border-t-[0.5px] border-outline-variant p-2 flex justify-end">
-          <button class="h-8 px-3 border-[0.5px] border-outline-variant hover:bg-surface-container-high transition-colors text-[10px] font-bold tracking-widest uppercase" type="button" data-clear>
+      <div class="absolute left-0 top-full w-72 border-[0.5px] border-outline-variant bg-surface shadow-sm z-20">
+        <div class="max-h-64 overflow-auto" data-options></div>
+        <div class="border-t-[0.5px] border-outline-variant flex">
+          <button class="h-10 flex-1 border-r-[0.5px] border-outline-variant hover:bg-surface-container-high transition-colors text-[10px] font-bold tracking-widest uppercase" type="button" data-clear>
             CLEAR
+          </button>
+          <button class="h-10 flex-1 hover:bg-on-surface hover:text-surface transition-colors text-[10px] font-bold tracking-widest uppercase" type="button" data-close>
+            CLOSE
           </button>
         </div>
       </div>
@@ -286,7 +310,8 @@ function renderTagFilters() {
     const optionsHost = /** @type {HTMLElement} */ (details.querySelector("[data-options]"));
     for (const v of g.values) {
       const row = document.createElement("label");
-      row.className = "flex items-center gap-2 px-2 py-2 hover:bg-surface-container-high cursor-pointer";
+      row.className =
+        "flex items-center gap-2 px-3 py-2 border-b-[0.5px] border-outline-variant last:border-b-0 hover:bg-surface-container-high cursor-pointer";
       const checked = filterState[g.key].has(v);
       row.innerHTML = `
         <input type="checkbox" class="accent-primary" ${checked ? "checked" : ""} />
@@ -308,6 +333,10 @@ function renderTagFilters() {
       filterState[g.key].clear();
       renderTagFilters();
       render();
+      details.removeAttribute("open");
+    });
+    details.querySelector("[data-close]")?.addEventListener("click", (e) => {
+      e.preventDefault();
       details.removeAttribute("open");
     });
 
