@@ -1,0 +1,388 @@
+
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GSAP Specimen Gallery</title>
+<script src=""></script>
+<link href="" rel="stylesheet"/>
+<link href="" rel="stylesheet"/>
+<link href="" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-container": "#dde1ff",
+                        "surface-container-high": "#e5e9e6",
+                        "surface-container-low": "#f2f4f2",
+                        "on-tertiary": "#fcf7ff",
+                        "outline-variant": "#adb3b0",
+                        "on-tertiary-fixed": "#37354f",
+                        "on-secondary-fixed-variant": "#5a5b61",
+                        "secondary": "#5d5f65",
+                        "inverse-surface": "#0d0f0e",
+                        "secondary-container": "#e2e2e9",
+                        "primary-fixed": "#dde1ff",
+                        "on-secondary-fixed": "#3e3f45",
+                        "tertiary-dim": "#53506b",
+                        "tertiary-fixed": "#d8d3f4",
+                        "on-surface-variant": "#5a605e",
+                        "on-primary-container": "#003dd9",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#767c79",
+                        "error-container": "#fe8983",
+                        "surface-tint": "#1049f1",
+                        "tertiary-container": "#d8d3f4",
+                        "on-error-container": "#752121",
+                        "error-dim": "#4e0309",
+                        "tertiary-fixed-dim": "#cac6e6",
+                        "secondary-dim": "#515359",
+                        "on-error": "#fff7f6",
+                        "surface-dim": "#d4dcd8",
+                        "primary-dim": "#003edb",
+                        "on-tertiary-fixed-variant": "#54516d",
+                        "inverse-primary": "#6d88ff",
+                        "secondary-fixed-dim": "#d4d4db",
+                        "surface-bright": "#f9f9f7",
+                        "surface-variant": "#dee4e0",
+                        "on-primary": "#f9f6ff",
+                        "inverse-on-surface": "#9c9d9b",
+                        "on-secondary": "#f9f8ff",
+                        "on-secondary-container": "#505157",
+                        "primary-fixed-dim": "#cbd2ff",
+                        "surface-container-highest": "#dee4e0",
+                        "background": "#f9f9f7",
+                        "secondary-fixed": "#e2e2e9",
+                        "primary": "#1049f1",
+                        "on-surface": "#2d3432",
+                        "error": "#9f403d",
+                        "tertiary": "#5f5c78",
+                        "on-primary-fixed": "#002fac",
+                        "surface-container": "#ecefec",
+                        "on-primary-fixed-variant": "#0545ef",
+                        "on-tertiary-container": "#4a4863",
+                        "surface": "#f9f9f7",
+                        "on-background": "#2d3432"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Space Grotesk", "sans-serif"],
+                        "label": ["Space Grotesk", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #f9f9f7;
+            color: #2d3432;
+        }
+        /* Hide scrollbar for a cleaner look but keep functionality */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f9f9f7;
+            border-left: 0.5px solid #adb3b0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #adb3b0;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1049f1;
+        }
+    </style>
+</head>
+<body class="overflow-hidden w-screen h-screen flex bg-background text-on-surface">
+<!-- SideNavBar -->
+<nav class="w-20 h-full flex flex-col border-r-[0.5px] border-outline-variant bg-surface shrink-0 z-20">
+<!-- Header -->
+<div class="h-16 flex flex-col items-center justify-center border-b-[0.5px] border-outline-variant">
+<span class="text-[10px] font-bold tracking-widest uppercase">ENGINE</span>
+<span class="text-[8px] text-outline tracking-widest">V3.12.5</span>
+</div>
+<!-- Main Tabs -->
+<div class="flex-1 flex flex-col">
+<!-- Active Tab -->
+<button class="h-20 flex flex-col items-center justify-center gap-1 border-b-[0.5px] border-outline-variant bg-on-surface text-surface transition-colors cursor-default">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="text-[8px] font-bold tracking-widest uppercase">GALLERY</span>
+</button>
+<!-- Inactive Tabs -->
+<button class="h-20 flex flex-col items-center justify-center gap-1 border-b-[0.5px] border-outline-variant text-on-surface hover:bg-primary hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-xl">timeline</span>
+<span class="text-[8px] font-bold tracking-widest uppercase">TIMELINE</span>
+</button>
+<button class="h-20 flex flex-col items-center justify-center gap-1 border-b-[0.5px] border-outline-variant text-on-surface hover:bg-primary hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-xl">settings_input_component</span>
+<span class="text-[8px] font-bold tracking-widest uppercase">PHYSICS</span>
+</button>
+<button class="h-20 flex flex-col items-center justify-center gap-1 border-b-[0.5px] border-outline-variant text-on-surface hover:bg-primary hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-xl">blur_on</span>
+<span class="text-[8px] font-bold tracking-widest uppercase">EASING</span>
+</button>
+<button class="h-20 flex flex-col items-center justify-center gap-1 border-b-[0.5px] border-outline-variant text-on-surface hover:bg-primary hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-xl">info</span>
+<span class="text-[8px] font-bold tracking-widest uppercase">ABOUT</span>
+</button>
+</div>
+<!-- Footer Tabs -->
+<div class="flex flex-col mt-auto border-t-[0.5px] border-outline-variant">
+<button class="h-16 flex flex-col items-center justify-center gap-1 border-b-[0.5px] border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-lg">description</span>
+<span class="text-[8px] font-bold tracking-widest uppercase">DOCS</span>
+</button>
+<button class="h-16 flex flex-col items-center justify-center gap-1 text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-lg">help</span>
+<span class="text-[8px] font-bold tracking-widest uppercase">SUPPORT</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col h-full overflow-hidden relative">
+<!-- TopNavBar -->
+<header class="h-16 flex items-center border-b-[0.5px] border-outline-variant bg-surface shrink-0 z-10 w-full">
+<!-- Brand -->
+<div class="h-full px-6 flex items-center border-r-[0.5px] border-outline-variant">
+<h1 class="text-xl font-bold tracking-tight uppercase text-on-surface">GSAP SPECIMEN</h1>
+</div>
+<!-- Navigation Links -->
+<div class="flex h-full flex-1">
+<button class="h-full px-8 flex items-center justify-center border-r-[0.5px] border-outline-variant text-sm font-bold uppercase tracking-widest text-primary bg-surface-container-lowest">
+                    ARCHIVE
+                </button>
+<button class="h-full px-8 flex items-center justify-center border-r-[0.5px] border-outline-variant text-sm font-bold uppercase tracking-widest text-on-surface hover:bg-surface-container-high transition-colors">
+                    INDEX
+                </button>
+<button class="h-full px-8 flex items-center justify-center border-r-[0.5px] border-outline-variant text-sm font-bold uppercase tracking-widest text-on-surface hover:bg-surface-container-high transition-colors">
+                    COLLECTIONS
+                </button>
+</div>
+<!-- Trailing Actions -->
+<div class="flex h-full">
+<button class="w-16 h-full flex items-center justify-center border-l-[0.5px] border-outline-variant text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined">tune</span>
+</button>
+<button class="w-16 h-full flex items-center justify-center border-l-[0.5px] border-outline-variant text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+<button class="h-full px-8 flex items-center justify-center border-l-[0.5px] border-outline-variant text-sm font-bold uppercase tracking-widest text-on-surface hover:bg-on-surface hover:text-surface transition-colors">
+                    LOGIN
+                </button>
+</div>
+</header>
+<!-- Gallery Grid (Zero-Gap) -->
+<main class="flex-1 overflow-y-auto bg-surface relative">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-0 w-full">
+<!-- Card 1 -->
+<div class="group flex flex-col h-[480px] border-b-[0.5px] border-r-[0.5px] border-outline-variant relative bg-surface">
+<!-- Hover Utility Actions -->
+<div class="absolute top-4 right-4 flex gap-0 border-[0.5px] border-outline-variant opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-surface">
+<button class="w-10 h-10 flex items-center justify-center border-r-[0.5px] border-outline-variant hover:bg-primary hover:text-surface transition-colors" title="Copy Code">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-primary hover:text-surface transition-colors" title="Expand">
+<span class="material-symbols-outlined text-sm">open_in_full</span>
+</button>
+</div>
+<!-- Preview Area -->
+<div class="flex-1 relative overflow-hidden bg-surface-container-low flex items-center justify-center">
+<div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9IiNhZGIzYjAiLz48L3N2Zz4=')]"></div>
+<img class="w-3/4 h-3/4 object-contain mix-blend-multiply grayscale contrast-125 group-hover:scale-105 transition-transform duration-700 ease-out" data-alt="abstract fluid shapes overlapping in minimalist monochrome style representing smooth easing transitions" src=""/>
+<div class="absolute bottom-4 left-4 flex gap-2">
+<span class="px-2 py-1 text-[9px] font-bold uppercase tracking-widest border-[0.5px] border-outline-variant bg-surface text-primary">AUTO-PLAY</span>
+</div>
+</div>
+<!-- Chin -->
+<div class="h-20 border-t-[0.5px] border-outline-variant p-4 flex flex-col justify-center bg-surface group-hover:bg-on-surface group-hover:text-surface transition-colors duration-300">
+<h3 class="text-sm font-bold tracking-tight uppercase">STAGGER_MATRIX_01</h3>
+<p class="text-[10px] text-outline mt-1 font-mono uppercase tracking-widest group-hover:text-surface-variant">GRID: [10, 10] / EASE: SINE.INOUT</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group flex flex-col h-[480px] border-b-[0.5px] border-r-[0.5px] border-outline-variant relative bg-surface">
+<div class="absolute top-4 right-4 flex gap-0 border-[0.5px] border-outline-variant opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-surface">
+<button class="w-10 h-10 flex items-center justify-center border-r-[0.5px] border-outline-variant hover:bg-primary hover:text-surface transition-colors" title="Copy Code">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-primary hover:text-surface transition-colors" title="Expand">
+<span class="material-symbols-outlined text-sm">open_in_full</span>
+</button>
+</div>
+<div class="flex-1 relative overflow-hidden bg-[#e5e9e6] flex items-center justify-center">
+<div class="absolute w-full h-[1px] bg-outline-variant top-1/2 -translate-y-1/2"></div>
+<div class="absolute w-[1px] h-full bg-outline-variant left-1/2 -translate-x-1/2"></div>
+<div class="w-16 h-16 border-[1px] border-primary rounded-full group-hover:scale-[2.5] group-hover:border-dashed transition-all duration-1000 ease-in-out flex items-center justify-center bg-surface">
+<span class="w-2 h-2 bg-primary"></span>
+</div>
+</div>
+<div class="h-20 border-t-[0.5px] border-outline-variant p-4 flex flex-col justify-center bg-surface group-hover:bg-on-surface group-hover:text-surface transition-colors duration-300">
+<h3 class="text-sm font-bold tracking-tight uppercase">SCALE_PULSE_V2</h3>
+<p class="text-[10px] text-outline mt-1 font-mono uppercase tracking-widest group-hover:text-surface-variant">YOYO: TRUE / REPEAT: -1</p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group flex flex-col h-[480px] border-b-[0.5px] border-r-[0.5px] border-outline-variant relative bg-surface">
+<div class="absolute top-4 right-4 flex gap-0 border-[0.5px] border-outline-variant opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-surface">
+<button class="w-10 h-10 flex items-center justify-center border-r-[0.5px] border-outline-variant hover:bg-primary hover:text-surface transition-colors" title="Copy Code">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-primary hover:text-surface transition-colors" title="Expand">
+<span class="material-symbols-outlined text-sm">open_in_full</span>
+</button>
+</div>
+<div class="flex-1 relative overflow-hidden bg-surface-container-low flex items-center justify-center">
+<img class="w-full h-full object-cover mix-blend-luminosity grayscale opacity-60 group-hover:opacity-100 transition-opacity duration-500" data-alt="architectural close up of structural beams intersecting forming geometric patterns in high contrast black and white" src=""/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-50"></div>
+</div>
+<div class="h-20 border-t-[0.5px] border-outline-variant p-4 flex flex-col justify-center bg-surface group-hover:bg-on-surface group-hover:text-surface transition-colors duration-300">
+<h3 class="text-sm font-bold tracking-tight uppercase">SCROLL_TRIGGER_PIN</h3>
+<p class="text-[10px] text-outline mt-1 font-mono uppercase tracking-widest group-hover:text-surface-variant">SCRUB: 1 / PIN: TRUE</p>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group flex flex-col h-[480px] border-b-[0.5px] border-r-[0.5px] border-outline-variant relative bg-surface">
+<div class="absolute top-4 right-4 flex gap-0 border-[0.5px] border-outline-variant opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-surface">
+<button class="w-10 h-10 flex items-center justify-center border-r-[0.5px] border-outline-variant hover:bg-primary hover:text-surface transition-colors" title="Copy Code">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-primary hover:text-surface transition-colors" title="Expand">
+<span class="material-symbols-outlined text-sm">open_in_full</span>
+</button>
+</div>
+<div class="flex-1 relative overflow-hidden bg-[#2d3432] flex items-center justify-center p-8">
+<div class="w-full h-full border-[0.5px] border-outline-variant relative overflow-hidden">
+<div class="absolute w-8 h-full bg-primary/20 left-0 top-0 group-hover:translate-x-[250px] transition-transform duration-[2000ms] ease-in-out"></div>
+<div class="absolute w-full h-[1px] bg-outline-variant/30 top-1/4"></div>
+<div class="absolute w-full h-[1px] bg-outline-variant/30 top-2/4"></div>
+<div class="absolute w-full h-[1px] bg-outline-variant/30 top-3/4"></div>
+</div>
+</div>
+<div class="h-20 border-t-[0.5px] border-outline-variant p-4 flex flex-col justify-center bg-surface group-hover:bg-on-surface group-hover:text-surface transition-colors duration-300">
+<h3 class="text-sm font-bold tracking-tight uppercase">SPLIT_TEXT_REVEAL</h3>
+<p class="text-[10px] text-outline mt-1 font-mono uppercase tracking-widest group-hover:text-surface-variant">TYPE: "CHARS,WORDS" / STAGGER: 0.05</p>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="group flex flex-col h-[480px] border-b-[0.5px] border-r-[0.5px] border-outline-variant relative bg-surface">
+<div class="absolute top-4 right-4 flex gap-0 border-[0.5px] border-outline-variant opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-surface">
+<button class="w-10 h-10 flex items-center justify-center border-r-[0.5px] border-outline-variant hover:bg-primary hover:text-surface transition-colors" title="Copy Code">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-primary hover:text-surface transition-colors" title="Expand">
+<span class="material-symbols-outlined text-sm">open_in_full</span>
+</button>
+</div>
+<div class="flex-1 relative overflow-hidden bg-surface-container-low flex flex-col items-center justify-center gap-2">
+<div class="w-24 h-[2px] bg-on-surface group-hover:-translate-x-4 transition-transform duration-500 ease-out"></div>
+<div class="w-24 h-[2px] bg-primary group-hover:translate-x-4 transition-transform duration-500 ease-out delay-75"></div>
+<div class="w-24 h-[2px] bg-outline group-hover:-translate-x-2 transition-transform duration-500 ease-out delay-150"></div>
+</div>
+<div class="h-20 border-t-[0.5px] border-outline-variant p-4 flex flex-col justify-center bg-surface group-hover:bg-on-surface group-hover:text-surface transition-colors duration-300">
+<h3 class="text-sm font-bold tracking-tight uppercase">TIMELINE_OFFSET_SEQ</h3>
+<p class="text-[10px] text-outline mt-1 font-mono uppercase tracking-widest group-hover:text-surface-variant">POSITION: "&lt;=0.2" / OVERLAP</p>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="group flex flex-col h-[480px] border-b-[0.5px] border-r-[0.5px] border-outline-variant relative bg-surface">
+<div class="absolute top-4 right-4 flex gap-0 border-[0.5px] border-outline-variant opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-surface">
+<button class="w-10 h-10 flex items-center justify-center border-r-[0.5px] border-outline-variant hover:bg-primary hover:text-surface transition-colors" title="Copy Code">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-primary hover:text-surface transition-colors" title="Expand">
+<span class="material-symbols-outlined text-sm">open_in_full</span>
+</button>
+</div>
+<div class="flex-1 relative overflow-hidden bg-surface-container-high flex items-center justify-center p-12">
+<div class="w-full h-full border-[1px] border-dashed border-outline flex items-center justify-center relative">
+<div class="w-12 h-12 bg-primary absolute top-0 left-0 group-hover:top-full group-hover:left-full group-hover:-translate-x-full group-hover:-translate-y-full transition-all duration-[1500ms] ease-[cubic-bezier(0.87,0,0.13,1)]"></div>
+</div>
+</div>
+<div class="h-20 border-t-[0.5px] border-outline-variant p-4 flex flex-col justify-center bg-surface group-hover:bg-on-surface group-hover:text-surface transition-colors duration-300">
+<h3 class="text-sm font-bold tracking-tight uppercase">CUSTOM_EASE_PATH</h3>
+<p class="text-[10px] text-outline mt-1 font-mono uppercase tracking-widest group-hover:text-surface-variant">EASE: CUSTOM(0.87, 0, 0.13, 1)</p>
+</div>
+</div>
+<!-- Card 7 -->
+<div class="group flex flex-col h-[480px] border-b-[0.5px] border-r-[0.5px] border-outline-variant relative bg-surface">
+<div class="absolute top-4 right-4 flex gap-0 border-[0.5px] border-outline-variant opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-surface">
+<button class="w-10 h-10 flex items-center justify-center border-r-[0.5px] border-outline-variant hover:bg-primary hover:text-surface transition-colors" title="Copy Code">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-primary hover:text-surface transition-colors" title="Expand">
+<span class="material-symbols-outlined text-sm">open_in_full</span>
+</button>
+</div>
+<div class="flex-1 relative overflow-hidden bg-[#2d3432] flex items-center justify-center">
+<img class="w-full h-full object-cover mix-blend-screen opacity-40 group-hover:opacity-80 transition-opacity duration-700" data-alt="close up of metallic mesh or grating with technical industrial lighting highlighting the repeating geometric structure" src=""/>
+</div>
+<div class="h-20 border-t-[0.5px] border-outline-variant p-4 flex flex-col justify-center bg-surface group-hover:bg-on-surface group-hover:text-surface transition-colors duration-300">
+<h3 class="text-sm font-bold tracking-tight uppercase">MORPH_SVG_MESH</h3>
+<p class="text-[10px] text-outline mt-1 font-mono uppercase tracking-widest group-hover:text-surface-variant">SHAPEINDEX: "AUTO" / DUR: 2S</p>
+</div>
+</div>
+<!-- Card 8 -->
+<div class="group flex flex-col h-[480px] border-b-[0.5px] border-r-[0.5px] border-outline-variant relative bg-surface">
+<div class="absolute top-4 right-4 flex gap-0 border-[0.5px] border-outline-variant opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-surface">
+<button class="w-10 h-10 flex items-center justify-center border-r-[0.5px] border-outline-variant hover:bg-primary hover:text-surface transition-colors" title="Copy Code">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-primary hover:text-surface transition-colors" title="Expand">
+<span class="material-symbols-outlined text-sm">open_in_full</span>
+</button>
+</div>
+<div class="flex-1 relative overflow-hidden bg-surface-container-low flex items-center justify-center p-8">
+<div class="grid grid-cols-5 grid-rows-5 gap-1 w-full aspect-square">
+<!-- Generate a small grid of dots -->
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[0ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[50ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[100ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[150ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[200ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[50ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[100ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[150ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[200ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[250ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[100ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[150ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[200ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[250ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[300ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[150ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[200ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[250ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[300ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[350ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[200ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[250ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[300ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[350ms]"></div>
+<div class="w-full h-full bg-outline-variant/20 rounded-none group-hover:bg-primary transition-colors delay-[400ms]"></div>
+</div>
+</div>
+<div class="h-20 border-t-[0.5px] border-outline-variant p-4 flex flex-col justify-center bg-surface group-hover:bg-on-surface group-hover:text-surface transition-colors duration-300">
+<h3 class="text-sm font-bold tracking-tight uppercase">GRID_WAVE_EFFECT</h3>
+<p class="text-[10px] text-outline mt-1 font-mono uppercase tracking-widest group-hover:text-surface-variant">STAGGER: { GRID: "AUTO", FROM: "CENTER" }</p>
+</div>
+</div>
+</div>
+<!-- Bottom Spacer to ensure last row borders look complete against the scroll edge -->
+<div class="h-16 w-full border-t-[0.5px] border-outline-variant bg-surface flex items-center justify-center">
+<span class="text-[10px] text-outline font-bold tracking-widest uppercase">END OF SPECIMENS</span>
+</div>
+</main>
+</div>
+</body></html>
