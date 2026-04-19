@@ -108,20 +108,24 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
   },
   block_melt: {
     duration: {
-      zh: "融化动作的整体时长（压扁 + 淡出 + 滴落持续）。",
-      en: "Overall melt duration (squash, fade, and drip motion)."
+      zh: "整次多点烧蚀扩散的总时长。",
+      en: "Overall duration of the multi-point burn-like dissolve."
     },
-    dripCount: {
-      zh: "生成的“滴落”数量。",
-      en: "Number of dripping particles spawned."
+    grid: {
+      zh: "方块被切成的网格密度；越大越细腻。",
+      en: "Grid density used to subdivide the block; higher values look finer."
     },
-    dripDistance: {
-      zh: "滴落向下的距离（像“流得更长”）。",
-      en: "How far drips fall downward."
+    seeds: {
+      zh: "随机出现的初始溶解点数量。",
+      en: "Number of random initial dissolve points."
     },
-    wobble: {
-      zh: "开始融化前的左右摇摆角度（度），用于增强“软塌”感觉。",
-      en: "Wobble angle (degrees) before melting to sell the soft/squishy feel."
+    spread: {
+      zh: "从初始点向外扩散的速度系数；越大扩散越慢、层次越明显。",
+      en: "Speed factor for outward spread; larger values make the propagation slower and more layered."
+    },
+    jitter: {
+      zh: "局部随机扰动，避免每次扩散边界过于整齐。",
+      en: "Random timing noise to avoid overly uniform dissolve fronts."
     }
   },
   block_shatter: {
@@ -414,6 +418,40 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
     shakeDuration: {
       zh: "单次抖动片段的时长（越小抖得越快）。",
       en: "Duration per shake segment (smaller = faster jitter)."
+    },
+    popScale: {
+      zh: "数字放大的峰值倍数（1 为关闭，越大越“弹”）。",
+      en: "Peak scale multiplier for the pop effect (1 disables it, higher feels punchier)."
+    },
+    popDuration: {
+      zh: "数字放大并回落的单段时长。",
+      en: "Duration of each half of the pop animation (grow and settle back)."
+    }
+  },
+  number_merge: {
+    left: {
+      zh: "左侧参与合并的数字。",
+      en: "Left-side number that participates in the merge."
+    },
+    right: {
+      zh: "右侧参与合并的数字。",
+      en: "Right-side number that participates in the merge."
+    },
+    travel: {
+      zh: "左右数字向中间聚合的移动距离。",
+      en: "Travel distance as the left and right numbers converge toward the center."
+    },
+    duration: {
+      zh: "整次合并演示的主要时长。",
+      en: "Main duration of the merge sequence."
+    },
+    resultScale: {
+      zh: "中间结果数字弹出的峰值放大倍数。",
+      en: "Peak scale multiplier for the center result pop."
+    },
+    glow: {
+      zh: "结果数字和乘号的高亮强度。",
+      en: "Highlight intensity on the sign and the merged result."
     }
   },
   number_transfer_particles: {
@@ -941,9 +979,7 @@ function openModal(id: string) {
     $btnAction.style.display = action ? "" : "none";
     if (action) {
       const icon = $btnAction.querySelector("[data-icon]") as HTMLElement | null;
-      const label = $btnAction.querySelector("[data-label]") as HTMLElement | null;
       if (icon) icon.textContent = action.icon;
-      if (label) label.textContent = action.label;
       $btnAction.title = action.label;
       $btnAction.onclick = () => {
         const host = $modalStage as any;
@@ -1000,13 +1036,10 @@ function createCard(demo: Demo) {
     "group flex flex-col h-[480px] border-b-[0.5px] border-r-[0.5px] border-outline-variant relative bg-surface";
 
   const actionHtml = demo.action
-    ? `<div class="ml-3 shrink-0 flex items-center gap-2">
-         <button class="h-9 px-3 flex items-center justify-center gap-2 border-[0.5px] border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary transition-colors"
-           title="${escapeHtml(demo.action.label)}" data-action="action" type="button">
-           <span class="material-symbols-outlined text-base">${escapeHtml(demo.action.icon)}</span>
-           <span class="text-[10px] font-mono uppercase tracking-widest">${escapeHtml(demo.action.label)}</span>
-         </button>
-       </div>`
+    ? `<button class="ml-3 shrink-0 w-9 h-9 flex items-center justify-center border-[0.5px] border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary transition-colors"
+         title="${escapeHtml(demo.action.label)}" data-action="action" type="button">
+         <span class="material-symbols-outlined text-base">${escapeHtml(demo.action.icon)}</span>
+       </button>`
     : "";
 
   el.innerHTML = `

@@ -19,6 +19,7 @@ import { demoFloatingNumbers } from "./floatingNumbers";
 import { demoBannerPop } from "./bannerPop";
 import { demoGlowPulse } from "./glowPulse";
 import { demoNumberAddFx } from "./numberAddFx";
+import { demoNumberMerge } from "./numberMerge";
 import { demoNumberTransferParticles } from "./numberTransferParticles";
 import { demoBlockShatter } from "./blockShatter";
 import { demoBlockMelt } from "./blockMelt";
@@ -38,6 +39,7 @@ export const demos: Demo[] = [
   demoScoreCounter,
   demoScreenShake,
   demoNumberAddFx,
+  demoNumberMerge,
   demoNumberTransferParticles,
   demoParticleBurst,
   demoFloatingNumbers,

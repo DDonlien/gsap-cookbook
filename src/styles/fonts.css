@@ -33,8 +33,9 @@
 }
 
 :root {
-  /* 注意：变量里可以包含完整的字体栈 */
-  --font-zh: "Maple Mono CN", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+  /* 中文模式也优先用英文字体显示拉丁字符，中文再回退到 CJK 字体 */
+  --font-zh: "JetBrains Mono", "Maple Mono CN", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
   --font-en: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;

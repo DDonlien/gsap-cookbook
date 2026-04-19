@@ -25,6 +25,7 @@ export const demoBlockShatter: Demo = {
     { key: "duration", label: "duration", type: "range", min: 0.25, max: 2, step: 0.05 },
     { key: "rotate", label: "rotate(deg)", type: "range", min: 0, max: 360, step: 5 }
   ],
+  action: { icon: "warning", label: "SHATTER" },
   mount(el, { reduceMotion, params } = {}) {
     const p = { ...(demoBlockShatter.defaults ?? {}), ...(params ?? {}) } as Record<string, unknown>;
     const grid = clampInt(Number(p.grid), 3, 10);
@@ -36,27 +37,18 @@ export const demoBlockShatter: Demo = {
       el.innerHTML = `
         <div class="w-full h-full relative overflow-hidden">
           <div class="stage absolute inset-0 flex items-center justify-center">
-            <div class="absolute inset-0 opacity-12 bg-[radial-gradient(circle_at_30%_20%,rgba(16,73,241,0.25),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(16,73,241,0.12),transparent_60%)]"></div>
             <button class="block relative w-[180px] h-[180px] border border-outline-variant bg-surface shadow-sm overflow-hidden select-none cursor-pointer" type="button">
               <div class="absolute inset-0 opacity-15 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zz4=PHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI2FkYjNiMCIvPjwvc3ZnPg==')]"></div>
             </button>
             <div class="pieces absolute inset-0 pointer-events-none"></div>
-          </div>
-
-          <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
-            <button class="btn w-10 h-10 flex items-center justify-center border-[0.5px] border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary transition-colors" type="button" title="shatter">
-              <span class="material-symbols-outlined text-base">warning</span>
-            </button>
-            <div class="text-[10px] font-mono uppercase tracking-widest text-outline">SHATTER</div>
           </div>
         </div>
       `;
 
       const stage = el.querySelector(".stage") as HTMLElement | null;
       const block = el.querySelector(".block") as HTMLButtonElement | null;
-      const btn = el.querySelector(".btn") as HTMLButtonElement | null;
       const piecesHost = el.querySelector(".pieces") as HTMLElement | null;
-      if (!stage || !block || !piecesHost || !btn) return;
+      if (!stage || !block || !piecesHost) return;
 
       const reset = () => {
         piecesHost.innerHTML = "";
@@ -91,10 +83,6 @@ export const demoBlockShatter: Demo = {
             part.style.top = `${top + y * sizeH}px`;
             part.style.width = `${Math.ceil(sizeW) + 0.5}px`;
             part.style.height = `${Math.ceil(sizeH) + 0.5}px`;
-            // 让碎片看起来更像来自同一块：加一点点纹理
-            part.style.backgroundImage =
-              "radial-gradient(circle at 30% 20%, rgba(16,73,241,0.18), transparent 55%), radial-gradient(circle at 70% 80%, rgba(16,73,241,0.08), transparent 60%)";
-            part.style.backgroundBlendMode = "screen";
             piecesHost.appendChild(part);
             pieces.push(part);
           }
@@ -131,15 +119,15 @@ export const demoBlockShatter: Demo = {
       };
 
       block.addEventListener("click", shatter);
-      btn.addEventListener("click", shatter);
+      (el as any).__action = shatter;
       (el as any).__cleanup = () => {
         block.removeEventListener("click", shatter);
-        btn.removeEventListener("click", shatter);
       };
     }, el);
 
     return () => {
       (el as any).__cleanup?.();
+      delete (el as any).__action;
       ctx.revert();
     };
   }

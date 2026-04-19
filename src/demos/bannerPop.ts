@@ -47,7 +47,6 @@ gsap.timeline()
     const ctx = gsap.context(() => {
       el.innerHTML = `
         <div class="w-full h-full flex items-center justify-center p-8 relative overflow-hidden">
-          <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_20%,rgba(16,73,241,0.55),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(16,73,241,0.35),transparent_60%)]"></div>
           <div class="banner relative text-6xl font-black tracking-tight text-on-surface select-none text-center leading-none" style="
             text-shadow: 0 10px 40px rgba(16,73,241,0.25);
             -webkit-text-stroke: 1px rgba(16,73,241,0.35);

@@ -8,10 +8,10 @@ function clampInt(n: number, a: number, b: number) {
 export const demoCardSelect: Demo = {
   id: "card_select",
   title: "CARD_SELECT",
-  subtitle: "CLICK / LIFT / DIM OTHERS",
+  subtitle: "MULTI-SELECT / LIFT / DIM OTHERS",
   defaults: {
     count: 6,
-    selectMode: "single",
+    selectMode: "multi",
     lift: 28,
     selectedScale: 1.06,
     dimOpacity: 0.45,
@@ -35,7 +35,7 @@ export const demoCardSelect: Demo = {
   ],
   getCode(params) {
     const count = Number(params.count);
-    const selectMode = String(params.selectMode ?? "single");
+    const selectMode = String(params.selectMode ?? "multi");
     const lift = Number(params.lift);
     const selectedScale = Number(params.selectedScale);
     const dimOpacity = Number(params.dimOpacity);
@@ -79,7 +79,7 @@ cards.forEach((el, i) => {
   mount(el, { reduceMotion, params } = {}) {
     const p = { ...(demoCardSelect.defaults ?? {}), ...(params ?? {}) } as Record<string, unknown>;
     const count = clampInt(Number(p.count), 3, 10);
-    const selectMode = String(p.selectMode ?? "single");
+    const selectMode = String(p.selectMode ?? "multi");
     const lift = Number(p.lift);
     const selectedScale = Number(p.selectedScale);
     const dimOpacity = Number(p.dimOpacity);
@@ -89,7 +89,9 @@ cards.forEach((el, i) => {
       el.innerHTML = `
         <div class="w-full h-full flex items-center justify-center p-8">
           <div class="w-full max-w-[620px]">
-            <div class="text-center text-[10px] font-mono uppercase tracking-widest text-outline mb-4">CLICK CARD</div>
+            <div class="text-center text-[10px] font-mono uppercase tracking-widest text-outline mb-4">${
+              selectMode === "multi" ? "CLICK CARDS" : "CLICK CARD"
+            }</div>
             <div class="hand relative h-[220px] flex items-end justify-center gap-3">
               ${Array.from({ length: count })
                 .map(

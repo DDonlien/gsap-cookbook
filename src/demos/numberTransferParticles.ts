@@ -47,12 +47,13 @@ export const demoNumberTransferParticles: Demo = {
     { key: "spread", label: "spread(px)", type: "range", min: 0, max: 120, step: 2 },
     { key: "size", label: "size(px)", type: "range", min: 2, max: 16, step: 1 }
   ],
+  action: { icon: "swap_horiz", label: "TRANSFER" },
   getCode(params) {
     const particleCount = Number(params.particleCount);
     const duration = Number(params.duration);
     const spread = Number(params.spread);
     const size = Number(params.size);
-    return `// NUMBER_TRANSFER（数字变粒子飞到另一个数字上，触发加减）
+    return `// NUMBER_TRANSFER（左侧数字扣减为粒子，飞到右侧后触发加减）
 const stage = document.querySelector(".stage");
 const fromEl = document.querySelector(".num-left");
 const toEl = document.querySelector(".num-right");
@@ -95,7 +96,6 @@ for (let i = 0; i < ${particleCount}; i++) {
       el.innerHTML = `
         <div class="w-full h-full relative overflow-hidden p-6">
           <div class="stage absolute inset-0 overflow-hidden">
-            <div class="absolute inset-0 opacity-12 bg-[radial-gradient(circle_at_30%_20%,rgba(16,73,241,0.25),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(16,73,241,0.12),transparent_60%)]"></div>
             <div class="num-left absolute left-6 top-6 text-5xl font-black tracking-tight tabular-nums text-on-surface">${format(
               left0
             )}</div>
@@ -103,23 +103,13 @@ for (let i = 0; i < ${particleCount}; i++) {
               right0
             )}</div>
           </div>
-
-          <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
-            <button class="btn w-10 h-10 flex items-center justify-center border-[0.5px] border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary transition-colors" type="button" title="transfer">
-              <span class="material-symbols-outlined text-base">swap_horiz</span>
-            </button>
-            <div class="text-[10px] font-mono uppercase tracking-widest text-outline">
-              ${op === "add" ? `+${format(amount)} → RIGHT` : `-${format(amount)} → RIGHT`}
-            </div>
-          </div>
         </div>
       `;
 
       const stage = el.querySelector(".stage") as HTMLElement | null;
       const leftEl = el.querySelector(".num-left") as HTMLElement | null;
       const rightEl = el.querySelector(".num-right") as HTMLElement | null;
-      const btn = el.querySelector(".btn") as HTMLButtonElement | null;
-      if (!stage || !leftEl || !rightEl || !btn) return;
+      if (!stage || !leftEl || !rightEl) return;
 
       let left = left0;
       let right = right0;
@@ -184,15 +174,23 @@ for (let i = 0; i < ${particleCount}; i++) {
         }
       };
 
+      let busy = false;
       const onTransfer = () => {
-        if (btn.disabled) return;
-        btn.disabled = true;
-        btn.classList.add("opacity-40", "cursor-not-allowed");
+        if (busy) return;
+        const transferred = Math.min(left, amount);
+        if (transferred <= 0) return;
+        busy = true;
 
         spawnParticles();
-        flash(leftEl, "#1049f1");
+        const nextLeft = Math.max(0, left - transferred);
+        const nextRight = op === "add" ? right + transferred : Math.max(0, right - transferred);
 
-        const nextRight = op === "add" ? right + amount : Math.max(0, right - amount);
+        animateNumberTo(leftEl, left, nextLeft);
+        flash(leftEl, "#b3261e");
+        if (!reduceMotion) {
+          gsap.fromTo(leftEl, { scale: 1 }, { scale: 0.9, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" });
+        }
+
         // 数字变化稍微延迟到“粒子到达”
         window.setTimeout(() => {
           animateNumberTo(rightEl, right, nextRight);
@@ -201,21 +199,20 @@ for (let i = 0; i < ${particleCount}; i++) {
           if (!reduceMotion) {
             gsap.fromTo(stage, { x: 0 }, { x: 10, duration: 0.08, yoyo: true, repeat: 3, ease: "power2.out" });
           }
+          left = nextLeft;
           right = nextRight;
         }, Math.round(duration * 700));
 
         window.setTimeout(() => {
-          btn.disabled = false;
-          btn.classList.remove("opacity-40", "cursor-not-allowed");
+          busy = false;
         }, Math.round(duration * 1000) + 250);
       };
 
-      btn.addEventListener("click", onTransfer);
-      (el as any).__cleanup = () => btn.removeEventListener("click", onTransfer);
+      (el as any).__action = onTransfer;
     }, el);
 
     return () => {
-      (el as any).__cleanup?.();
+      delete (el as any).__action;
       ctx.revert();
     };
   }

@@ -23,6 +23,7 @@ export const demoFloatingNumbers: Demo = {
     { key: "scale", label: "scale", type: "range", min: 0.6, max: 1.8, step: 0.05 },
     { key: "intervalMs", label: "previewInterval(ms)", type: "range", min: 250, max: 1600, step: 50 }
   ],
+  action: { icon: "add", label: "SPAWN" },
   getCode(params) {
     const duration = Number(params.duration);
     const rise = Number(params.rise);
@@ -58,20 +59,14 @@ function spawn(text, host) {
       el.innerHTML = `
         <div class="w-full h-full relative overflow-hidden">
           <div class="host absolute inset-0 pointer-events-none"></div>
-          <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
-            <button class="btn w-10 h-10 flex items-center justify-center border-[0.5px] border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary transition-colors" type="button" title="spawn">
-              <span class="material-symbols-outlined text-base">add</span>
-            </button>
-            <div class="text-[10px] font-mono uppercase tracking-widest text-outline">
-              ${mode === "preview" ? "AUTO" : "CLICK / BUTTON"}
-            </div>
+          <div class="absolute top-3 left-1/2 -translate-x-1/2 text-[10px] font-mono uppercase tracking-widest text-outline">
+            ${mode === "preview" ? "AUTO" : "CLICK STAGE"}
           </div>
         </div>
       `;
 
       const host = el.querySelector(".host") as HTMLElement | null;
-      const btn = el.querySelector(".btn") as HTMLButtonElement | null;
-      if (!host || !btn) return;
+      if (!host) return;
 
       const samples = ["+10", "+25", "x1.5", "x2", "CRIT!", "LUCKY!"];
 
@@ -109,16 +104,7 @@ function spawn(text, host) {
         );
       };
 
-      const onClick = (e: MouseEvent) => {
-        spawn(e.clientX, e.clientY);
-        gsap.fromTo(btn, { scale: 0.95 }, { scale: 1.05, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" });
-      };
-      btn.addEventListener("click", onClick);
-      // 点击舞台也可触发（更贴近游戏里的“命中位置飘字”）
       const onStage = (e: MouseEvent) => {
-        // 避免点到按钮区域重复触发
-        const inBtn = (e.target as Element | null)?.closest(".btn");
-        if (inBtn) return;
         spawn(e.clientX, e.clientY);
       };
       el.addEventListener("click", onStage);
@@ -129,14 +115,15 @@ function spawn(text, host) {
       }
 
       (el as any).__cleanup = () => {
-        btn.removeEventListener("click", onClick);
         el.removeEventListener("click", onStage);
         if (timer) window.clearInterval(timer);
       };
+      (el as any).__action = () => spawn();
     }, el);
 
     return () => {
       (el as any).__cleanup?.();
+      delete (el as any).__action;
       ctx.revert();
     };
   }

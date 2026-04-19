@@ -72,7 +72,6 @@ export const demoPkShakePack: Demo = {
       el.innerHTML = `
         <div class="w-full h-full relative overflow-hidden">
           <div class="stage absolute inset-0 flex items-center justify-center">
-            <div class="absolute inset-0 opacity-12 bg-[radial-gradient(circle_at_30%_20%,rgba(16,73,241,0.22),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(16,73,241,0.10),transparent_60%)]"></div>
             <div class="grid grid-cols-3 gap-4">
               ${[0, 1, 2]
                 .map(

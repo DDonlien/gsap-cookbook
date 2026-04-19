@@ -19,6 +19,7 @@ export const demoBlockSwallow: Demo = {
     { key: "zoom", label: "zoom", type: "range", min: 1, max: 2, step: 0.02 },
     { key: "bite", label: "bite(px)", type: "range", min: 0, max: 40, step: 1 }
   ],
+  action: { icon: "restaurant", label: "SWALLOW" },
   mount(el, { reduceMotion, params } = {}) {
     const p = { ...(demoBlockSwallow.defaults ?? {}), ...(params ?? {}) } as Record<string, unknown>;
     const duration = Number(p.duration);
@@ -29,18 +30,10 @@ export const demoBlockSwallow: Demo = {
       el.innerHTML = `
         <div class="w-full h-full relative overflow-hidden">
           <div class="stage absolute inset-0 flex items-center justify-center">
-            <div class="absolute inset-0 opacity-12 bg-[radial-gradient(circle_at_30%_20%,rgba(16,73,241,0.22),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(16,73,241,0.10),transparent_60%)]"></div>
             <div class="row relative flex items-center gap-6">
               <button class="pred relative w-[160px] h-[160px] border border-outline-variant bg-surface shadow-sm cursor-pointer" type="button"></button>
               <div class="prey relative w-[120px] h-[120px] border border-outline-variant bg-surface shadow-sm"></div>
             </div>
-          </div>
-
-          <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
-            <button class="btn w-10 h-10 flex items-center justify-center border-[0.5px] border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary transition-colors" type="button" title="swallow">
-              <span class="material-symbols-outlined text-base">restaurant</span>
-            </button>
-            <div class="text-[10px] font-mono uppercase tracking-widest text-outline">SWALLOW</div>
           </div>
         </div>
       `;
@@ -48,8 +41,7 @@ export const demoBlockSwallow: Demo = {
       const pred = el.querySelector(".pred") as HTMLButtonElement | null;
       const prey = el.querySelector(".prey") as HTMLElement | null;
       const stage = el.querySelector(".stage") as HTMLElement | null;
-      const btn = el.querySelector(".btn") as HTMLButtonElement | null;
-      if (!pred || !prey || !stage || !btn) return;
+      if (!pred || !prey || !stage) return;
 
       let busy = false;
       const reset = () => {
@@ -108,15 +100,15 @@ export const demoBlockSwallow: Demo = {
       };
 
       pred.addEventListener("click", swallow);
-      btn.addEventListener("click", swallow);
+      (el as any).__action = swallow;
       (el as any).__cleanup = () => {
         pred.removeEventListener("click", swallow);
-        btn.removeEventListener("click", swallow);
       };
     }, el);
 
     return () => {
       (el as any).__cleanup?.();
+      delete (el as any).__action;
       ctx.revert();
     };
   }

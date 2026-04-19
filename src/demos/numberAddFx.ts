@@ -12,7 +12,7 @@ function lerp(a: number, b: number, t: number) {
 export const demoNumberAddFx: Demo = {
   id: "number_add_fx",
   title: "NUMBER_ADD_FX",
-  subtitle: "ROLL / SHAKE / FLASH",
+  subtitle: "ROLL / SHAKE / POP / FLASH",
   defaults: {
     base: 1250,
     minAdd: 25,
@@ -20,7 +20,9 @@ export const demoNumberAddFx: Demo = {
     rollDuration: 0.55,
     flash: 0.55,
     shake: 10,
-    shakeDuration: 0.25
+    shakeDuration: 0.25,
+    popScale: 1.14,
+    popDuration: 0.18
   },
   controls: [
     { key: "base", label: "base", type: "range", min: 0, max: 9999, step: 1 },
@@ -29,25 +31,32 @@ export const demoNumberAddFx: Demo = {
     { key: "rollDuration", label: "rollDuration", type: "range", min: 0.1, max: 1.8, step: 0.05 },
     { key: "flash", label: "flash", type: "range", min: 0, max: 1, step: 0.05 },
     { key: "shake", label: "shake(px)", type: "range", min: 0, max: 40, step: 1 },
-    { key: "shakeDuration", label: "shakeDuration", type: "range", min: 0.05, max: 0.8, step: 0.05 }
+    { key: "shakeDuration", label: "shakeDuration", type: "range", min: 0.05, max: 0.8, step: 0.05 },
+    { key: "popScale", label: "popScale", type: "range", min: 1, max: 1.5, step: 0.01 },
+    { key: "popDuration", label: "popDuration", type: "range", min: 0.05, max: 0.5, step: 0.01 }
   ],
+  action: { icon: "add", label: "ADD" },
   getCode(params) {
     const rollDuration = Number(params.rollDuration);
     const flash = Number(params.flash);
     const shake = Number(params.shake);
     const shakeDuration = Number(params.shakeDuration);
-    return `// NUMBER_ADD_FX（数字加法：滚动 + 抖动 + 闪烁）
+    const popScale = Number(params.popScale);
+    const popDuration = Number(params.popDuration);
+    return `// NUMBER_ADD_FX（数字加法：滚动 + 抖动 + 放大 + 闪烁）
 const el = document.querySelector(".num");
 const wrap = document.querySelector(".wrap");
+const state = { value: 0 };
 
 function animateAdd(from, to) {
   // 1) 数字滚动（更新 textContent）
-  const obj = { v: from };
-  gsap.to(obj, {
-    v: to,
+  state.value = from;
+  gsap.to(state, {
+    value: to,
     duration: ${rollDuration},
     ease: "power3.out",
-    onUpdate: () => (el.textContent = Math.round(obj.v).toLocaleString())
+    overwrite: true,
+    onUpdate: () => (el.textContent = Math.round(state.value).toLocaleString())
   });
 
   // 2) 轻微闪烁（高光）
@@ -56,8 +65,25 @@ function animateAdd(from, to) {
       flash ? 0 : 999
     } });
 
-  // 3) 命中感抖动
-  gsap.fromTo(wrap, { x: 0 }, { x: ${shake}, duration: ${shakeDuration}, ease: "power2.out", yoyo: true, repeat: 5, repeatRefresh: true });
+  // 3) 数字本体抖动
+  gsap.fromTo(el, { x: 0, y: 0 }, {
+    x: () => gsap.utils.random(-${shake}, ${shake}),
+    y: () => gsap.utils.random(-${Math.max(1, Math.round(shake * 0.35))}, ${Math.max(1, Math.round(shake * 0.35))}),
+    duration: ${shakeDuration},
+    ease: "power2.out",
+    yoyo: true,
+    repeat: 5,
+    repeatRefresh: true
+  });
+
+  // 4) 数字放大再回落
+  const popBoost = Math.max(0, ${popScale} - 1);
+  const currentScale = Number(gsap.getProperty(el, "scale")) || 1;
+  const targetScale = Math.min(Math.max(${popScale}, currentScale + popBoost), 1 + popBoost * 3);
+  gsap.killTweensOf(el, "scale");
+  gsap.timeline()
+    .to(el, { scale: targetScale, duration: ${popDuration}, ease: "power2.out" })
+    .to(el, { scale: 1, duration: ${popDuration} * 1.15, ease: "power3.out" });
 }`;
   },
   mount(el, { reduceMotion, params } = {}) {
@@ -69,6 +95,8 @@ function animateAdd(from, to) {
     const flash = Number(p.flash);
     const shake = Number(p.shake);
     const shakeDuration = Number(p.shakeDuration);
+    const popScale = Number(p.popScale);
+    const popDuration = Number(p.popDuration);
 
     const ctx = gsap.context(() => {
       el.innerHTML = `
@@ -76,40 +104,34 @@ function animateAdd(from, to) {
           <div class="wrap relative">
             <div class="num text-6xl font-black tracking-tight text-on-surface tabular-nums">${format(base)}</div>
           </div>
-          <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
-            <button class="btn w-10 h-10 flex items-center justify-center border-[0.5px] border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary transition-colors" type="button" title="add">
-              <span class="material-symbols-outlined text-base">add</span>
-            </button>
-            <div class="text-[10px] font-mono uppercase tracking-widest text-outline">ADD</div>
-          </div>
         </div>
       `;
 
       const num = el.querySelector(".num") as HTMLElement | null;
       const wrap = el.querySelector(".wrap") as HTMLElement | null;
-      const btn = el.querySelector(".btn") as HTMLButtonElement | null;
-      if (!num || !wrap || !btn) return;
+      if (!num || !wrap) return;
 
-      let value = base;
-      num.textContent = format(value);
+      const state = { value: base };
+      num.textContent = format(state.value);
+      gsap.set(num, { transformOrigin: "50% 50%" });
 
       const animateTo = (next: number) => {
         if (reduceMotion) {
-          value = next;
-          num.textContent = format(value);
+          state.value = next;
+          num.textContent = format(state.value);
           return;
         }
 
         // 1) 数字滚动
-        const obj = { v: value };
-        gsap.to(obj, {
-          v: next,
+        gsap.to(state, {
+          value: next,
           duration: rollDuration,
           ease: "power3.out",
-          onUpdate: () => (num.textContent = format(obj.v)),
+          overwrite: true,
+          onUpdate: () => (num.textContent = format(state.value)),
           onComplete: () => {
-            value = next;
-            num.textContent = format(value);
+            state.value = next;
+            num.textContent = format(state.value);
           }
         });
 
@@ -123,13 +145,15 @@ function animateAdd(from, to) {
           );
         }
 
-        // 3) 抖动（命中感）
+        // 3) 数字本体抖动
         if (shake > 0) {
+          gsap.killTweensOf(num, "x,y");
           gsap.fromTo(
-            wrap,
-            { x: 0 },
+            num,
+            { x: 0, y: 0 },
             {
               x: () => lerp(-shake, shake, Math.random()),
+              y: () => lerp(-shake * 0.35, shake * 0.35, Math.random()),
               duration: shakeDuration,
               ease: "power2.out",
               yoyo: true,
@@ -138,14 +162,31 @@ function animateAdd(from, to) {
             }
           );
         }
+
+        // 4) 数字放大再回落
+        if (popScale > 1) {
+          const popBoost = Math.max(0, popScale - 1);
+          const currentScale = Number(gsap.getProperty(num, "scale")) || 1;
+          const targetScale = Math.min(Math.max(popScale, currentScale + popBoost), 1 + popBoost * 3);
+          gsap.killTweensOf(num, "scale");
+          gsap
+            .timeline()
+            .to(num, { scale: targetScale, duration: popDuration, ease: "power2.out" })
+            .to(num, { scale: 1, duration: popDuration * 1.15, ease: "power3.out" });
+        }
       };
 
-      btn.addEventListener("click", () => {
+      const triggerAdd = () => {
         const add = Math.round(lerp(minAdd, maxAdd, Math.random()));
-        animateTo(value + add);
-      });
+        animateTo(state.value + add);
+      };
+
+      (el as any).__action = triggerAdd;
     }, el);
 
-    return () => ctx.revert();
+    return () => {
+      delete (el as any).__action;
+      ctx.revert();
+    };
   }
 };
