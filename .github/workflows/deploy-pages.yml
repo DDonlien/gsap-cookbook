@@ -39,21 +39,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Stamp version into dist
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import os, re, pathlib
-          sha = (os.environ.get("GITHUB_SHA", "UNVERSIONED") or "UNVERSIONED")[:7]
-          p = pathlib.Path("dist/index.html")
-          s = p.read_text(encoding="utf-8")
-          s2 = re.sub(r'window\.__REPO_VERSION__\s*=\s*"[^"]*"\s*;', f'window.__REPO_VERSION__ = "{sha}";', s)
-          p.write_text(s2, encoding="utf-8")
-          print("Stamped version:", sha)
-          PY
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

@@ -88,22 +88,36 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
       en: "Initial tilt angle in degrees during pop-in."
     }
   },
-  block_knockback: {
-    dash: {
-      zh: "攻击方前冲距离（像“冲刺一小段”）。",
-      en: "Attacker dash distance (a short lunge forward)."
-    },
-    knock: {
-      zh: "受击方被击退距离（越大越“飞”）。",
-      en: "Knockback distance for the target (bigger = more recoil)."
-    },
-    rotate: {
-      zh: "受击时随机旋转幅度上限（度）。",
-      en: "Max random rotation applied on hit (degrees)."
+  block_immovable: {
+    intensity: {
+      zh: "方块每次震动的最大偏移量（px）。",
+      en: "Maximum offset of each vibration in pixels."
     },
     duration: {
-      zh: "一次击打的整体时长（影响 dash / knock / 回弹）。",
-      en: "Overall hit duration (dash, knockback, and recovery timing)."
+      zh: "方块受击抖动的总时长（秒）。",
+      en: "Total duration of the hit vibration in seconds."
+    },
+    flash: {
+      zh: "是否在受击瞬间短暂提高亮度以模拟闪白。",
+      en: "Whether to briefly increase brightness on hit to simulate a flash."
+    }
+  },
+  block_knockback: {
+    clone: {
+      zh: "是否复制一个方块去冲刺撞击，否则由本体直接冲刺。",
+      en: "Whether to clone the block for dashing, or dash the original body."
+    },
+    grid: {
+      zh: "被撞碎方块切分的网格数量。",
+      en: "Number of rows and columns to split the shattered block."
+    },
+    power: {
+      zh: "方块撞碎后碎片向右飞散的力度。",
+      en: "Power of the shattered pieces flying out to the right."
+    },
+    duration: {
+      zh: "撞击和飞散动作的整体基础时长。",
+      en: "Overall base duration of the dash and shatter action."
     }
   },
   block_melt: {
@@ -134,16 +148,20 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
       en: "Fragment grid size (higher = more/smaller pieces)."
     },
     power: {
-      zh: "碎片爆开的力度/位移幅度（像“炸开”距离）。",
-      en: "Explosion power / displacement distance of fragments."
+      zh: "碎片飞出的基础力度（像素）。",
+      en: "Base force for pieces flying out (in pixels)."
     },
     duration: {
-      zh: "碎片飞散并淡出的时长。",
-      en: "Duration for fragments to fly out and fade."
+      zh: "碎裂飞散的持续时间（秒）。",
+      en: "Duration of the shatter explosion in seconds."
     },
     rotate: {
-      zh: "碎片旋转幅度上限（度）。",
-      en: "Max rotation applied to fragments (degrees)."
+      zh: "碎片飞出时随机旋转的最大角度。",
+      en: "Maximum random rotation angle when pieces fly out."
+    },
+    angle: {
+      zh: "受击/爆破的方向。默认 Center 为中心向外炸开；其他方向则碎片朝特定方向飞散。",
+      en: "Direction of the hit/explosion. Center means radial explosion; others scatter pieces directionally."
     }
   },
   block_swallow: {
@@ -160,7 +178,7 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
       en: "Horizontal bite offset as the prey vanishes (a slight pull)."
     }
   },
-  card_deal: {
+  card_deal_fan: {
     count: {
       zh: "发牌数量（手牌张数）。",
       en: "Number of cards dealt."
@@ -173,25 +191,37 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
       zh: "发牌起点 Y 偏移（相对最终手牌中心）。",
       en: "Deal origin Y offset (relative to final hand center)."
     },
+    open: {
+      zh: "展开程度（0~1）：0 为收拢，1 为完全展开。",
+      en: "Open amount (0–1): 0 closed, 1 fully fanned."
+    },
+    spread: {
+      zh: "扇形展开角度范围（度）。",
+      en: "Fan spread angle range (degrees)."
+    },
+    spacing: {
+      zh: "相邻卡牌的水平间距（px）。",
+      en: "Horizontal spacing between cards (px)."
+    },
+    lift: {
+      zh: "两侧卡牌的上抬基础高度（形成弧线）。",
+      en: "Base lift amount for outer cards (creates an arc)."
+    },
+    yProfile: {
+      zh: "手牌的额外 Y 轴分布形状（如正弦、随机等）。",
+      en: "Extra Y-axis profile shape (e.g. sin, random)."
+    },
+    yAmount: {
+      zh: "额外 Y 轴分布的影响幅度（px）。",
+      en: "Amplitude for the extra Y profile (px)."
+    },
     duration: {
-      zh: "每张牌飞到位的动画时长。",
+      zh: "发牌移动的时长。",
       en: "Duration for each card to arrive."
     },
     stagger: {
       zh: "发牌的错开间隔（stagger）。",
       en: "Stagger delay between cards."
-    },
-    spread: {
-      zh: "扇形展开角度（越大越“展开”）。",
-      en: "Fan spread angle (bigger = wider fan)."
-    },
-    yProfile: {
-      zh: "手牌的弧线形状（中间高/低、随机等）。",
-      en: "Arc profile for the hand layout (center high/low/random)."
-    },
-    yAmount: {
-      zh: "弧线高度幅度（配合 yProfile）。",
-      en: "Arc height amount (used with yProfile)."
     },
     ease: {
       zh: "发牌移动的缓动曲线。",
@@ -346,36 +376,6 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
       en: "Highlighted cell color during the wave."
     }
   },
-  hand_fan: {
-    count: {
-      zh: "手牌数量。",
-      en: "Number of cards in hand."
-    },
-    open: {
-      zh: "展开程度（0~1）：0 为收拢，1 为完全展开。",
-      en: "Open amount (0–1): 0 closed, 1 fully fanned."
-    },
-    spread: {
-      zh: "扇形展开角度范围（度）。",
-      en: "Fan spread angle range (degrees)."
-    },
-    spacing: {
-      zh: "相邻卡牌的水平间距（px）。",
-      en: "Horizontal spacing between cards (px)."
-    },
-    lift: {
-      zh: "两侧卡牌的上抬高度（形成弧线）。",
-      en: "Lift amount for outer cards (creates an arc)."
-    },
-    duration: {
-      zh: "布局变化的过渡时长。",
-      en: "Transition duration when layout changes."
-    },
-    ease: {
-      zh: "布局过渡的缓动曲线。",
-      en: "Easing for layout transitions."
-    }
-  },
   hover_tilt: {
     maxTilt: {
       zh: "最大倾斜角（度），决定鼠标移动时的 3D 倾斜强度。",
@@ -385,9 +385,31 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
       zh: "高光强度（透明度）。",
       en: "Glow strength (opacity)."
     },
+    glowType: {
+      zh: "高光类型/方向：同侧角落渐变、对侧角落渐变、或者直接跟随鼠标的聚光灯（spot）。",
+      en: "Glow type/direction: same-side corner gradient, opposite corner, or mouse-following spot."
+    },
+    glowOverflow: {
+      zh: "高光溢出处理（是否允许光晕超出卡牌边界）。",
+      en: "Glow overflow behavior (clip or visible outside card)."
+    },
     duration: {
       zh: "跟随鼠标的缓动时长（越大越“黏”）。",
       en: "Follow smoothing duration (higher feels more “laggy/smooth”)."
+    }
+  },
+  lag_tilt: {
+    maxTilt: {
+      zh: "最大倾斜角（度）。",
+      en: "Max tilt angle (degrees)."
+    },
+    speed: {
+      zh: "跟随速度系数（0~1，越大跟随越紧密，越小延迟越大）。",
+      en: "Follow speed factor (0-1, higher = tighter follow, lower = more lag)."
+    },
+    distanceFactor: {
+      zh: "倾斜灵敏度（延迟距离对倾斜角度的影响系数）。",
+      en: "Tilt sensitivity (how much the lag distance affects tilt angle)."
     }
   },
   number_add_fx: {
@@ -556,24 +578,6 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
       en: "Easing for dot scaling."
     }
   },
-  score_counter: {
-    from: {
-      zh: "起始分数。",
-      en: "Start value."
-    },
-    to: {
-      zh: "目标分数。",
-      en: "Target value."
-    },
-    duration: {
-      zh: "计数从 from 变化到 to 的时长。",
-      en: "Duration to count from from → to."
-    },
-    ease: {
-      zh: "计数变化的缓动曲线（只影响变化速度曲线）。",
-      en: "Easing curve for the counting progression."
-    }
-  },
   screen_shake: {
     intensity: {
       zh: "抖动幅度（px）。",
@@ -636,6 +640,36 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
     ease: {
       zh: "字符进入的缓动。",
       en: "Easing for character entrance."
+    }
+  },
+  text_shift_pop: {
+    char1: {
+      zh: "初始居中的主数字或主文本。",
+      en: "Primary number or text that starts centered."
+    },
+    char2: {
+      zh: "播放后出现的辅助内容。用空格分隔符号和数字，例如 x 4。",
+      en: "Helper content revealed after the shift. Separate symbol and number with a space, e.g. x 4."
+    },
+    direction: {
+      zh: "辅助内容出现的方向；主数字会向相反方向移动，使最终组合整体居中。",
+      en: "Direction where the helper appears; the primary text moves opposite so the final group stays centered."
+    },
+    gap: {
+      zh: "主数字、符号、新数字之间的统一间距（px）。",
+      en: "Uniform spacing between the primary number, symbol, and new number (px)."
+    },
+    shiftDuration: {
+      zh: "主数字从初始居中移动到最终组合位置的时长。",
+      en: "Duration for the primary text to move from centered to its final grouped position."
+    },
+    popDuration: {
+      zh: "辅助内容从隐藏弹出到正常大小的时长。",
+      en: "Duration for the helper content to pop from hidden to normal size."
+    },
+    shake: {
+      zh: "辅助内容弹出后的抖动幅度（px），0 表示关闭。",
+      en: "Shake amplitude after the helper pops in (px); 0 disables it."
     }
   },
   timeline_offset_seq: {
@@ -746,8 +780,9 @@ function setLang(next: Lang) {
 function setRepoVersion() {
   const $ver = document.getElementById("repoVersion");
   if (!$ver) return;
-  const fallback = (window as any).__REPO_VERSION__ || "UNVERSIONED";
-  $ver.textContent = fallback;
+  // @ts-ignore
+  const version = typeof __APP_VERSION__ !== "undefined" ? `v${__APP_VERSION__}` : "v1.0.0";
+  $ver.textContent = version;
 }
 
 function copyText(text: string) {
@@ -798,6 +833,43 @@ function highlightCodeHtml(code: string, demo: Demo, params: Record<string, unkn
 // -------- modal state --------
 const modalState: { demoId: string | null; params: Record<string, unknown> } = { demoId: null, params: {} };
 let modalCleanup: null | (() => void) = null;
+
+const STORAGE_KEY_PARAMS = "demo_params_v1";
+
+function loadSavedParams(demoId: string): Record<string, unknown> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PARAMS);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed[demoId] || {};
+  } catch {
+    return {};
+  }
+}
+
+function saveParam(demoId: string, key: string, value: unknown) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PARAMS);
+    const parsed = raw ? JSON.parse(raw) : {};
+    if (!parsed[demoId]) parsed[demoId] = {};
+    parsed[demoId][key] = value;
+    localStorage.setItem(STORAGE_KEY_PARAMS, JSON.stringify(parsed));
+  } catch (err) {
+    console.error("Failed to save params", err);
+  }
+}
+
+function clearSavedParams(demoId: string) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PARAMS);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    delete parsed[demoId];
+    localStorage.setItem(STORAGE_KEY_PARAMS, JSON.stringify(parsed));
+  } catch (err) {
+    console.error("Failed to clear params", err);
+  }
+}
 
 function updateModalCode(demo: Demo) {
   if (!$modalCode || !$btnCopy) return;
@@ -867,6 +939,7 @@ function renderControls(demo: Demo) {
       select.addEventListener("input", () => {
         const v = select.value;
         modalState.params[c.key] = v;
+        saveParam(demo.id, c.key, v);
         rerenderModal();
       });
     } else if (c.type === "color") {
@@ -878,6 +951,7 @@ function renderControls(demo: Demo) {
       inputHost.appendChild(input);
       input.addEventListener("input", () => {
         modalState.params[c.key] = input.value;
+        saveParam(demo.id, c.key, input.value);
         rerenderModal();
       });
     } else if (c.type === "text") {
@@ -890,6 +964,7 @@ function renderControls(demo: Demo) {
       inputHost.appendChild(input);
       input.addEventListener("input", () => {
         modalState.params[c.key] = input.value;
+        saveParam(demo.id, c.key, input.value);
         rerenderModal();
       });
     } else {
@@ -925,7 +1000,9 @@ function renderControls(demo: Demo) {
       const sync = (v: string) => {
         slider.value = v;
         number.value = v;
-        modalState.params[c.key] = Number(v);
+        const numVal = Number(v);
+        modalState.params[c.key] = numVal;
+        saveParam(demo.id, c.key, numVal);
         rerenderModal();
       };
       slider.addEventListener("input", () => sync(slider.value));
@@ -957,7 +1034,8 @@ function openModal(id: string) {
   $modalSubTitle.textContent = demo.subtitle;
 
   modalState.demoId = demo.id;
-  modalState.params = { ...(demo.defaults ?? {}) };
+  const savedParams = loadSavedParams(demo.id);
+  modalState.params = { ...(demo.defaults ?? {}), ...savedParams };
 
   updateModalCode(demo);
   renderControls(demo);
@@ -1002,6 +1080,30 @@ function closeModal() {
   modalCleanup = null;
   $modalStage.innerHTML = "";
   $modal.classList.add("hidden");
+  
+  // 更新主界面的 gallery 以便在弹窗关闭后能够使用最新的参数重绘被更改的 demo
+  if (modalState.demoId) {
+    const cardEl = document.querySelector(`.group[data-demo-id="${modalState.demoId}"]`);
+    if (cardEl) {
+      const demo = demos.find((d) => d.id === modalState.demoId);
+      const stage = cardEl.querySelector("[data-preview]") as HTMLElement | null;
+      if (demo && stage) {
+        previewCleanup.get(demo.id)?.();
+        stage.innerHTML = "";
+        try {
+          const savedParams = loadSavedParams(demo.id);
+          const params = { ...(demo.defaults ?? {}), ...savedParams } as Record<string, unknown>;
+          const cleanup = demo.mount(stage, { reduceMotion, mode: "preview", params });
+          previewCleanup.set(demo.id, cleanup);
+        } catch (err) {
+          stage.innerHTML = `<div class="p-4 text-xs text-error font-mono">初始化失败：${escapeHtml(
+            (err as Error)?.message ?? String(err)
+          )}</div>`;
+        }
+      }
+    }
+  }
+
   modalState.demoId = null;
   modalState.params = {};
   if (location.hash) history.replaceState(null, "", location.pathname + location.search);
@@ -1021,7 +1123,11 @@ function bindModalEvents() {
     if (!modalState.demoId) return;
     const demo = demos.find((d) => d.id === modalState.demoId);
     if (!demo) return;
+    
+    // 恢复为默认参数并清除本地存储
     modalState.params = { ...(demo.defaults ?? {}) };
+    clearSavedParams(demo.id);
+    
     renderControls(demo);
     rerenderModal();
   });
@@ -1034,6 +1140,7 @@ function createCard(demo: Demo) {
   const el = document.createElement("div");
   el.className =
     "group flex flex-col h-[480px] border-b-[0.5px] border-r-[0.5px] border-outline-variant relative bg-surface";
+  el.dataset.demoId = demo.id;
 
   const actionHtml = demo.action
     ? `<button class="ml-3 shrink-0 w-9 h-9 flex items-center justify-center border-[0.5px] border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary transition-colors"
@@ -1084,7 +1191,8 @@ function createCard(demo: Demo) {
     if (!btn) return;
     const action = btn.getAttribute("data-action");
     if (action === "copy") {
-      const params = { ...(demo.defaults ?? {}) } as Record<string, unknown>;
+      const savedParams = loadSavedParams(demo.id);
+      const params = { ...(demo.defaults ?? {}), ...savedParams } as Record<string, unknown>;
       copyText(getDemoCode(demo, params));
     }
     if (action === "expand") openModal(demo.id);
@@ -1097,7 +1205,9 @@ function createCard(demo: Demo) {
         if (!host) return;
         previewCleanup.get(demo.id)?.();
         host.innerHTML = "";
-        const cleanup = demo.mount(host, { reduceMotion, mode: "preview" });
+        const savedParams = loadSavedParams(demo.id);
+        const params = { ...(demo.defaults ?? {}), ...savedParams } as Record<string, unknown>;
+        const cleanup = demo.mount(host, { reduceMotion, mode: "preview", params });
         previewCleanup.set(demo.id, cleanup);
       }
     }
@@ -1106,7 +1216,9 @@ function createCard(demo: Demo) {
       if (!stage) return;
       previewCleanup.get(demo.id)?.();
       stage.innerHTML = "";
-      const cleanup = demo.mount(stage, { reduceMotion, mode: "preview" });
+      const savedParams = loadSavedParams(demo.id);
+      const params = { ...(demo.defaults ?? {}), ...savedParams } as Record<string, unknown>;
+      const cleanup = demo.mount(stage, { reduceMotion, mode: "preview", params });
       previewCleanup.set(demo.id, cleanup);
     }
   });
@@ -1127,7 +1239,9 @@ function renderGallery(list: Demo[]) {
     const stage = card.querySelector("[data-preview]") as HTMLElement | null;
     if (!stage) continue;
     try {
-      const cleanup = demo.mount(stage, { reduceMotion, mode: "preview" });
+      const savedParams = loadSavedParams(demo.id);
+      const params = { ...(demo.defaults ?? {}), ...savedParams } as Record<string, unknown>;
+      const cleanup = demo.mount(stage, { reduceMotion, mode: "preview", params });
       previewCleanup.set(demo.id, cleanup);
     } catch (err) {
       stage.innerHTML = `<div class="p-4 text-xs text-error font-mono">初始化失败：${escapeHtml(

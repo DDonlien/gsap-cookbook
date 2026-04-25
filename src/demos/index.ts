@@ -6,12 +6,11 @@ import { demoScrollTriggerPin } from "./scrollTriggerPin";
 import { demoTextReveal } from "./textReveal";
 import { demoTimelineOffsetSeq } from "./timelineOffsetSeq";
 import { demoGridWaveEffect } from "./gridWaveEffect";
-import { demoCardDeal } from "./cardDeal";
+import { demoCardDealFan } from "./cardDealFan";
 import { demoCardFlip } from "./cardFlip";
 import { demoHoverTilt } from "./hoverTilt";
-import { demoHandFan } from "./handFan";
+import { demoLagTilt } from "./lagTilt";
 import { demoCardSelect } from "./cardSelect";
-import { demoScoreCounter } from "./scoreCounter";
 import { demoScreenShake } from "./screenShake";
 import { demoParticleBurst } from "./particleBurst";
 import { demoRarityShine } from "./rarityShine";
@@ -25,18 +24,20 @@ import { demoBlockShatter } from "./blockShatter";
 import { demoBlockMelt } from "./blockMelt";
 import { demoBlockSwallow } from "./blockSwallow";
 import { demoBlockKnockback } from "./blockKnockback";
+import { demoBlockImmovable } from "./blockImmovable";
 import { demoPkShakePack } from "./pkShakePack";
 import { demoDropShadow } from "./dropShadow";
+import { demoTextShiftPop } from "./textShiftPop";
 
 export const demos: Demo[] = [
-  demoCardDeal,
+  demoTextShiftPop,
+  demoCardDealFan,
   demoCardFlip,
   demoHoverTilt,
+  demoLagTilt,
   demoDropShadow,
-  demoHandFan,
   demoCardSelect,
   demoRarityShine,
-  demoScoreCounter,
   demoScreenShake,
   demoNumberAddFx,
   demoNumberMerge,
@@ -47,6 +48,7 @@ export const demos: Demo[] = [
   demoBlockMelt,
   demoBlockSwallow,
   demoBlockKnockback,
+  demoBlockImmovable,
   demoPkShakePack,
   demoBannerPop,
   demoGlowPulse,

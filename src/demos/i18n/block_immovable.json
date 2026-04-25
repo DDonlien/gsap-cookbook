@@ -1,0 +1,18 @@
+{
+  "title": { "zh": "方块抖动 (不动)", "en": "Immovable block" },
+  "subtitle": { "zh": "实体受击 / 高频震动", "en": "Solid hit / Vibrate" },
+  "controls": {
+    "intensity": {
+      "label": { "zh": "抖动强度(px)", "en": "Intensity (px)" },
+      "desc": { "zh": "方块每次震动的最大偏移量", "en": "Maximum offset of each vibration" }
+    },
+    "duration": {
+      "label": { "zh": "抖动时长(s)", "en": "Duration (s)" },
+      "desc": { "zh": "方块受击抖动的总时长", "en": "Total duration of the hit vibration" }
+    },
+    "flash": {
+      "label": { "zh": "受击闪光", "en": "Flash on hit" },
+      "desc": { "zh": "是否在受击瞬间闪白", "en": "Whether to flash white on hit" }
+    }
+  }
+}

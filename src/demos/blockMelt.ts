@@ -97,8 +97,8 @@ cells.forEach(({ cell, row, col }) => {
       el.innerHTML = `
         <div class="w-full h-full relative overflow-hidden">
           <div class="stage absolute inset-0 flex items-center justify-center">
-            <div class="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 text-[10px] font-mono uppercase tracking-[0.28em] text-outline">
-              CLICK BLOCK TO DISSOLVE
+            <div class="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 text-[10px] font-mono uppercase tracking-[0.28em] text-outline text-center">
+              CLICK TO DISSOLVE<br/>CLICK AGAIN TO RESET
             </div>
             <button class="block relative w-[180px] h-[180px] border-[0.5px] border-outline-variant bg-surface shadow-sm cursor-pointer select-none" type="button" aria-label="Dissolve block">
             </button>
@@ -115,12 +115,10 @@ cells.forEach(({ cell, row, col }) => {
       if (!stage || !block || !cellsHost || !burnsHost) return;
 
       let busy = false;
-      let resetCall: gsap.core.Tween | null = null;
+      let isMelted = false;
 
       const reset = () => {
-        busy = false;
-        resetCall?.kill();
-        resetCall = null;
+        isMelted = false;
         cellsHost.innerHTML = "";
         burnsHost.innerHTML = "";
         gsap.set(block, {
@@ -137,15 +135,22 @@ cells.forEach(({ cell, row, col }) => {
 
       const melt = () => {
         if (busy) return;
+        if (isMelted) {
+          reset();
+          return;
+        }
+        
         busy = true;
-        resetCall?.kill();
+        isMelted = true;
 
         if (reduceMotion) {
           gsap.to(block, {
             autoAlpha: 0,
             duration: 0.18,
             ease: "power1.in",
-            onComplete: reset
+            onComplete: () => {
+              busy = false;
+            }
           });
           return;
         }
@@ -220,7 +225,6 @@ cells.forEach(({ cell, row, col }) => {
               x: rand(-3, 3),
               y: rand(-3, 3),
               rotation: rand(-8, 8),
-              filter: "blur(1px)",
               duration: duration * rand(0.18, 0.3),
               delay,
               ease: "power2.out",
@@ -237,13 +241,15 @@ cells.forEach(({ cell, row, col }) => {
           ease: "power1.out"
         });
 
-        resetCall = gsap.delayedCall(duration + 0.9, reset);
+        gsap.delayedCall(duration + 0.9, () => {
+          busy = false;
+        });
       };
 
-      block.addEventListener("click", melt);
+      stage.addEventListener("click", melt);
       (el as any).__action = melt;
       (el as any).__cleanup = () => {
-        block.removeEventListener("click", melt);
+        stage.removeEventListener("click", melt);
       };
     }, el);
 

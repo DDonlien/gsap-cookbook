@@ -17,13 +17,26 @@ export const demoBlockShatter: Demo = {
     grid: 6,
     power: 140,
     duration: 0.75,
-    rotate: 120
+    rotate: 120,
+    angle: -1
   },
   controls: [
     { key: "grid", label: "grid", type: "range", min: 3, max: 10, step: 1 },
     { key: "power", label: "power(px)", type: "range", min: 40, max: 280, step: 5 },
     { key: "duration", label: "duration", type: "range", min: 0.25, max: 2, step: 0.05 },
-    { key: "rotate", label: "rotate(deg)", type: "range", min: 0, max: 360, step: 5 }
+    { key: "rotate", label: "rotate(deg)", type: "range", min: 0, max: 360, step: 5 },
+    {
+      key: "angle",
+      label: "hit angle(deg)",
+      type: "select",
+      options: [
+        { label: "Center(中心)", value: "-1" },
+        { label: "Right(向右)", value: "0" },
+        { label: "Down(向下)", value: "90" },
+        { label: "Left(向左)", value: "180" },
+        { label: "Up(向上)", value: "270" }
+      ]
+    }
   ],
   action: { icon: "warning", label: "SHATTER" },
   mount(el, { reduceMotion, params } = {}) {
@@ -32,6 +45,7 @@ export const demoBlockShatter: Demo = {
     const power = Number(p.power);
     const duration = Number(p.duration);
     const rotate = Number(p.rotate);
+    const angle = Number(p.angle);
 
     const ctx = gsap.context(() => {
       el.innerHTML = `
@@ -92,15 +106,49 @@ export const demoBlockShatter: Demo = {
 
         const cx = left + w / 2;
         const cy = top + h / 2;
+
         pieces.forEach((part) => {
           const pr = part.getBoundingClientRect();
           const px = pr.left - rStage.left + pr.width / 2;
           const py = pr.top - rStage.top + pr.height / 2;
-          const dx = (px - cx) / (w / 2);
-          const dy = (py - cy) / (h / 2);
-          const mag = Math.sqrt(dx * dx + dy * dy) || 1;
-          const nx = dx / mag;
-          const ny = dy / mag;
+          
+          let nx = 0;
+          let ny = 0;
+
+          if (angle === -1) {
+            // Center (Radial) explosion
+            const dx = (px - cx) / (w / 2);
+            const dy = (py - cy) / (h / 2);
+            const mag = Math.sqrt(dx * dx + dy * dy) || 1;
+            nx = dx / mag;
+            ny = dy / mag;
+          } else {
+            // Directional explosion
+            const rad = (angle * Math.PI) / 180;
+            // Base directional vector
+            const bx = Math.cos(rad);
+            const by = Math.sin(rad);
+            // Add spread based on position relative to the hit direction
+            // e.g. if hitting from left (angle 0), top pieces spread up, bottom pieces spread down
+            const spreadY = (py - cy) / (h / 2);
+            const spreadX = (px - cx) / (w / 2);
+            
+            if (angle === 0 || angle === 180) {
+               nx = bx + lerp(-0.2, 0.2, Math.random());
+               ny = by + spreadY * 0.8 + lerp(-0.2, 0.2, Math.random());
+            } else if (angle === 90 || angle === 270) {
+               nx = bx + spreadX * 0.8 + lerp(-0.2, 0.2, Math.random());
+               ny = by + lerp(-0.2, 0.2, Math.random());
+            } else {
+               nx = bx + lerp(-0.4, 0.4, Math.random());
+               ny = by + lerp(-0.4, 0.4, Math.random());
+            }
+            
+            // Normalize
+            const mag = Math.sqrt(nx * nx + ny * ny) || 1;
+            nx /= mag;
+            ny /= mag;
+          }
 
           gsap.to(part, {
             x: nx * power + lerp(-18, 18, Math.random()),
