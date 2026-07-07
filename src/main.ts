@@ -200,8 +200,16 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
       en: "Fan spread angle range (degrees)."
     },
     spacing: {
-      zh: "相邻卡牌的水平间距（px）。",
-      en: "Horizontal spacing between cards (px)."
+      zh: "相邻卡牌在分布曲线上的间距，可按固定值或卡牌宽度百分比计算。",
+      en: "Spacing along the distribution curve, either fixed or as a percentage of card width."
+    },
+    spacingUnit: {
+      zh: "spacing 的单位：固定 px 或卡牌宽度百分比。",
+      en: "Spacing unit: fixed px or percentage of card width."
+    },
+    spacingBasis: {
+      zh: "spacing 的比较对象：两张卡的中心点，或一张卡右边点到下一张卡左边点。",
+      en: "Spacing basis: center-to-center, or right edge of one card to left edge of the next."
     },
     lift: {
       zh: "两侧卡牌的上抬基础高度（形成弧线）。",
@@ -210,6 +218,10 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
     yProfile: {
       zh: "手牌的额外 Y 轴分布形状（如正弦、随机等）。",
       en: "Extra Y-axis profile shape (e.g. sin, random)."
+    },
+    yProfileAnchor: {
+      zh: "Y profile 贴合卡牌的位置：中央顶边、正中央或中央底边。",
+      en: "Card point aligned to the Y profile: top center, center, or bottom center."
     },
     yAmount: {
       zh: "额外 Y 轴分布的影响幅度（px）。",

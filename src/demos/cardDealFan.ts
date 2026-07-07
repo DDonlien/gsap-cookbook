@@ -5,6 +5,98 @@ function clampInt(n: number, a: number, b: number) {
   return Math.min(b, Math.max(a, Math.round(n)));
 }
 
+const CARD_W = 120;
+const CARD_H = 170;
+
+type YProfileAnchor = "top" | "center" | "bottom";
+type SpacingBasis = "center" | "edge";
+type SpacingUnit = "px" | "percent";
+
+function getProfileY(t: number, yProfile: string, lift: number, yAmount: number) {
+  const baseLift = -Math.abs(t) * lift;
+
+  let f = 0;
+  if (yProfile === "arc") f = Math.abs(t);
+  else if (yProfile === "sin") f = Math.sin(Math.abs(t) * Math.PI / 2);
+  else if (yProfile === "cap") f = -Math.abs(t);
+  else if (yProfile === "random") f = Math.sin(t * 12.9898 + 78.233) * 0.8;
+
+  return baseLift - f * yAmount;
+}
+
+function getAnchorLocalY(anchor: YProfileAnchor) {
+  if (anchor === "top") return -CARD_H / 2;
+  if (anchor === "bottom") return CARD_H / 2;
+  return 0;
+}
+
+function resolveSpacing(spacing: number, unit: SpacingUnit) {
+  return unit === "percent" ? CARD_W * (spacing / 100) : spacing;
+}
+
+function makeCurveLayout(
+  count: number,
+  spacing: number,
+  spacingUnit: SpacingUnit,
+  spacingBasis: SpacingBasis,
+  yProfileAnchor: YProfileAnchor,
+  lift: number,
+  yProfile: string,
+  yAmount: number,
+  spread: number,
+  open01: number
+) {
+  const center = (count - 1) / 2;
+  const spacingPx = resolveSpacing(spacing, spacingUnit);
+  const centerStep = spacingBasis === "edge" ? spacingPx + CARD_W : spacingPx;
+  const halfDistance = centerStep * center;
+  const halfRange = Math.max(1, halfDistance);
+  const samples = 240;
+  const curve = Array.from({ length: samples + 1 }, (_, i) => {
+    const t = -1 + (i / samples) * 2;
+    return {
+      t,
+      x: t * halfRange,
+      y: getProfileY(t, yProfile, lift, yAmount)
+    };
+  });
+  const lengths = [0];
+  for (let i = 1; i < curve.length; i += 1) {
+    const dx = curve[i].x - curve[i - 1].x;
+    const dy = curve[i].y - curve[i - 1].y;
+    lengths[i] = lengths[i - 1] + Math.hypot(dx, dy);
+  }
+  const centerLength = lengths[lengths.length - 1] / 2;
+
+  const pointAtLength = (target: number) => {
+    const clamped = Math.min(lengths[lengths.length - 1], Math.max(0, target));
+    let hi = lengths.findIndex((len) => len >= clamped);
+    if (hi <= 0) return curve[0];
+    const lo = hi - 1;
+    const span = Math.max(0.0001, lengths[hi] - lengths[lo]);
+    const a = (clamped - lengths[lo]) / span;
+    return {
+      t: curve[lo].t + (curve[hi].t - curve[lo].t) * a,
+      x: curve[lo].x + (curve[hi].x - curve[lo].x) * a,
+      y: curve[lo].y + (curve[hi].y - curve[lo].y) * a
+    };
+  };
+
+  const anchorLocalY = getAnchorLocalY(yProfileAnchor);
+
+  return Array.from({ length: count }, (_, i) => {
+    const point = pointAtLength(centerLength + (i - center) * centerStep);
+    const rotation = (i - center) * (spread / Math.max(count - 1, 1));
+    const rad = (rotation * Math.PI) / 180;
+    const rotatedAnchorY = Math.cos(rad) * anchorLocalY;
+    return {
+      x: point.x * open01,
+      y: (point.y - rotatedAnchorY + anchorLocalY) * open01,
+      rotation: rotation * open01
+    };
+  });
+}
+
 export const demoCardDealFan: Demo = {
   id: "card_deal_fan",
   title: "DEAL & FAN",
@@ -16,8 +108,11 @@ export const demoCardDealFan: Demo = {
     open: 1,
     spread: 60,
     spacing: 50,
+    spacingUnit: "px",
+    spacingBasis: "center",
     lift: 20,
     yProfile: "arc",
+    yProfileAnchor: "bottom",
     yAmount: 20,
     duration: 0.6,
     stagger: 0.05,
@@ -29,7 +124,25 @@ export const demoCardDealFan: Demo = {
     { key: "sourceY", label: "sourceY(px)", type: "range", min: -240, max: 240, step: 10 },
     { key: "open", label: "open(0..1)", type: "range", min: 0, max: 1, step: 0.01 },
     { key: "spread", label: "spread(deg)", type: "range", min: 0, max: 90, step: 1 },
-    { key: "spacing", label: "spacing(px)", type: "range", min: 20, max: 80, step: 1 },
+    { key: "spacing", label: "spacing", type: "range", min: 10, max: 120, step: 1 },
+    {
+      key: "spacingUnit",
+      label: "spacingUnit",
+      type: "select",
+      options: [
+        { label: "px(固定值)", value: "px" },
+        { label: "% card width", value: "percent" }
+      ]
+    },
+    {
+      key: "spacingBasis",
+      label: "spacingFrom",
+      type: "select",
+      options: [
+        { label: "center to center", value: "center" },
+        { label: "edge to edge", value: "edge" }
+      ]
+    },
     { key: "lift", label: "lift(px)", type: "range", min: 0, max: 60, step: 1 },
     {
       key: "yProfile",
@@ -41,6 +154,16 @@ export const demoCardDealFan: Demo = {
         { label: "cap(反向拱起)", value: "cap" },
         { label: "flat(全平)", value: "flat" },
         { label: "random(随机)", value: "random" }
+      ]
+    },
+    {
+      key: "yProfileAnchor",
+      label: "yAlign",
+      type: "select",
+      options: [
+        { label: "top center", value: "top" },
+        { label: "card center", value: "center" },
+        { label: "bottom center", value: "bottom" }
       ]
     },
     { key: "yAmount", label: "yAmount(px)", type: "range", min: 0, max: 60, step: 1 },
@@ -65,8 +188,11 @@ export const demoCardDealFan: Demo = {
     const open = Number(params.open);
     const spread = Number(params.spread);
     const spacing = Number(params.spacing);
+    const spacingUnit = String(params.spacingUnit) as SpacingUnit;
+    const spacingBasis = String(params.spacingBasis) as SpacingBasis;
     const lift = Number(params.lift);
     const yProfile = String(params.yProfile);
+    const yProfileAnchor = String(params.yProfileAnchor) as YProfileAnchor;
     const yAmount = Number(params.yAmount);
     const duration = Number(params.duration);
     const stagger = Number(params.stagger);
@@ -76,28 +202,66 @@ export const demoCardDealFan: Demo = {
 const cards = document.querySelectorAll(".card");
 const count = ${count};
 const open = ${open}; // 0..1
+const cardW = ${CARD_W};
+const cardH = ${CARD_H};
+const spacingPx = "${spacingUnit}" === "percent" ? cardW * (${spacing} / 100) : ${spacing};
+const centerStep = "${spacingBasis}" === "edge" ? spacingPx + cardW : spacingPx;
+const anchorY = { top: -cardH / 2, center: 0, bottom: cardH / 2 }["${yProfileAnchor}"];
+
+function profileY(t) {
+  const baseLift = -Math.abs(t) * ${lift};
+  let f = 0;
+  if ("${yProfile}" === "arc") f = Math.abs(t);
+  else if ("${yProfile}" === "sin") f = Math.sin(Math.abs(t) * Math.PI / 2);
+  else if ("${yProfile}" === "cap") f = -Math.abs(t);
+  else if ("${yProfile}" === "random") f = Math.sin(t * 12.9898 + 78.233) * 0.8;
+  return baseLift - f * ${yAmount};
+}
+
+function curveLayout(open01) {
+  const center = (count - 1) / 2;
+  const halfRange = Math.max(1, centerStep * center);
+  const samples = 240;
+  const curve = Array.from({ length: samples + 1 }, (_, i) => {
+    const t = -1 + (i / samples) * 2;
+    return { t, x: t * halfRange, y: profileY(t) };
+  });
+  const lengths = [0];
+  for (let i = 1; i < curve.length; i++) {
+    lengths[i] = lengths[i - 1] + Math.hypot(curve[i].x - curve[i - 1].x, curve[i].y - curve[i - 1].y);
+  }
+  const pointAt = (target) => {
+    const clamped = Math.min(lengths[lengths.length - 1], Math.max(0, target));
+    const hi = Math.max(1, lengths.findIndex((len) => len >= clamped));
+    const lo = hi - 1;
+    const a = (clamped - lengths[lo]) / Math.max(0.0001, lengths[hi] - lengths[lo]);
+    return {
+      x: curve[lo].x + (curve[hi].x - curve[lo].x) * a,
+      y: curve[lo].y + (curve[hi].y - curve[lo].y) * a
+    };
+  };
+  const centerLength = lengths[lengths.length - 1] / 2;
+  return Array.from({ length: count }, (_, i) => {
+    const point = pointAt(centerLength + (i - center) * centerStep);
+    const rotation = (i - center) * (${spread} / Math.max(count - 1, 1));
+    const rotatedAnchorY = Math.cos(rotation * Math.PI / 180) * anchorY;
+    return {
+      x: point.x * open01,
+      y: (point.y - rotatedAnchorY + anchorY) * open01,
+      rotation: rotation * open01
+    };
+  });
+}
 
 // 发牌起点
 gsap.set(cards, { x: ${sourceX}, y: ${sourceY}, rotation: -20, scale: 0.9, transformOrigin: "50% 120%" });
 
 // 飞到扇形位置
+const layout = curveLayout(open);
 gsap.to(cards, {
-  x: (i) => (i - (count - 1) / 2) * ${spacing} * open,
-  y: (i) => {
-    const center = (count - 1) / 2;
-    const t = (i - center) / Math.max(center, 1); // -1..1
-    let baseLift = -Math.abs(t) * ${lift};
-    
-    let f = 0;
-    if ("${yProfile}" === "arc") f = Math.abs(t);
-    else if ("${yProfile}" === "sin") f = Math.sin(Math.abs(t) * Math.PI/2);
-    else if ("${yProfile}" === "cap") f = -Math.abs(t);
-    else if ("${yProfile}" === "random") f = (Math.random() * 2 - 1) * 0.8;
-    else f = 0;
-    
-    return (baseLift - f * ${yAmount}) * open;
-  },
-  rotation: (i) => (i - (count - 1) / 2) * (${spread} / Math.max(count - 1, 1)) * open,
+  x: (i) => layout[i].x,
+  y: (i) => layout[i].y,
+  rotation: (i) => layout[i].rotation,
   scale: 1,
   duration: ${duration},
   stagger: ${stagger},
@@ -112,38 +276,34 @@ gsap.to(cards, {
     const open = Number(p.open);
     const spread = Number(p.spread);
     const spacing = Number(p.spacing);
+    const spacingUnit = String(p.spacingUnit) as SpacingUnit;
+    const spacingBasis = String(p.spacingBasis) as SpacingBasis;
     const lift = Number(p.lift);
     const yProfile = String(p.yProfile);
+    const yProfileAnchor = String(p.yProfileAnchor) as YProfileAnchor;
     const yAmount = Number(p.yAmount);
     const duration = Number(p.duration);
     const stagger = Number(p.stagger);
     const ease = String(p.ease);
 
-    // 计算 y 偏移的辅助函数
-    const calcY = (i: number, open01: number) => {
-      const center = (count - 1) / 2;
-      const denom = Math.max(center, 1);
-      const t = (i - center) / denom; // -1..1
-      let baseLift = -Math.abs(t) * lift;
-      
-      let f = 0;
-      if (yProfile === "arc") f = Math.abs(t);
-      else if (yProfile === "sin") f = Math.sin(Math.abs(t) * Math.PI / 2);
-      else if (yProfile === "cap") f = -Math.abs(t);
-      else if (yProfile === "random") f = (Math.random() * 2 - 1) * 0.8;
-      else f = 0;
-      
-      return (baseLift - f * yAmount) * open01;
-    };
-
     // 独立计算坐标的方法，用于 hover 恢复或 open 调整
     const layoutTo = (cards: HTMLElement[], open01: number, dur = 0.3, dEase = "power2.out", stg = 0) => {
-      const center = (count - 1) / 2;
-      const denom = Math.max(center, 1);
+      const layout = makeCurveLayout(
+        count,
+        spacing,
+        spacingUnit,
+        spacingBasis,
+        yProfileAnchor,
+        lift,
+        yProfile,
+        yAmount,
+        spread,
+        open01
+      );
       return gsap.to(cards, {
-        x: (i) => (i - center) * spacing * open01,
-        y: (i) => calcY(i, open01),
-        rotation: (i) => (i - center) * (spread / denom) * open01,
+        x: (i) => layout[i].x,
+        y: (i) => layout[i].y,
+        rotation: (i) => layout[i].rotation,
         scale: 1,
         duration: reduceMotion ? 0 : dur,
         ease: dEase,
@@ -211,8 +371,20 @@ gsap.to(cards, {
           if (!card) return;
           // 重新按当前 open 布局一次（只影响这一个卡牌的 y，这里用一个小技巧直接触发全局布局但不影响其他）
           const i = Number(card.dataset.i);
+          const layout = makeCurveLayout(
+            count,
+            spacing,
+            spacingUnit,
+            spacingBasis,
+            yProfileAnchor,
+            lift,
+            yProfile,
+            yAmount,
+            spread,
+            Number(p.open)
+          );
           gsap.to(card, {
-            y: calcY(i, Number(p.open)),
+            y: layout[i].y,
             duration: 0.2,
             ease: "power2.out",
             overwrite: "auto"
@@ -238,11 +410,23 @@ gsap.to(cards, {
       if (mode === "preview" && !reduceMotion) {
         // 重置状态
         gsap.set(cards, { x: sourceX, y: sourceY, rotation: -20, scale: 0.9 });
+        const layout = makeCurveLayout(
+          count,
+          spacing,
+          spacingUnit,
+          spacingBasis,
+          yProfileAnchor,
+          lift,
+          yProfile,
+          yAmount,
+          spread,
+          1
+        );
         tl = gsap.timeline({ repeat: -1, repeatDelay: 1 });
         tl.to(cards, {
-          x: (i) => (i - (count - 1) / 2) * spacing * 1,
-          y: (i) => calcY(i, 1),
-          rotation: (i) => (i - (count - 1) / 2) * (spread / Math.max(count - 1, 1)) * 1,
+          x: (i) => layout[i].x,
+          y: (i) => layout[i].y,
+          rotation: (i) => layout[i].rotation,
           scale: 1,
           duration,
           ease,
