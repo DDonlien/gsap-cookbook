@@ -7,44 +7,68 @@ function clampInt(n: number, a: number, b: number) {
 
 const CARD_W = 120;
 const CARD_H = 170;
+const CARD_ORIGIN_Y = CARD_H * 1.2;
+const CARD_ORIGIN_FROM_BOTTOM = CARD_ORIGIN_Y - CARD_H;
+const STAGE_W = 520;
+const STAGE_H = 200;
 
 type YProfileAnchor = "top" | "center" | "bottom";
 type SpacingBasis = "center" | "edge";
 type SpacingUnit = "px" | "percent";
+type CurvePoint = { t: number; x: number; y: number };
+type SampledCurvePoint = CurvePoint & { tangentAngle: number };
 
-function getProfileY(t: number, yProfile: string, lift: number, yAmount: number) {
-  const baseLift = -Math.abs(t) * lift;
-
-  let f = 0;
-  if (yProfile === "arc") f = Math.abs(t);
-  else if (yProfile === "sin") f = Math.sin(Math.abs(t) * Math.PI / 2);
-  else if (yProfile === "cap") f = -Math.abs(t);
-  else if (yProfile === "random") f = Math.sin(t * 12.9898 + 78.233) * 0.8;
-
-  return baseLift - f * yAmount;
+function smoothstep(n: number) {
+  return n * n * (3 - 2 * n);
 }
 
-function getAnchorLocalY(anchor: YProfileAnchor) {
-  if (anchor === "top") return -CARD_H / 2;
-  if (anchor === "bottom") return CARD_H / 2;
+function hashRandom(n: number) {
+  let x = Math.imul(n + 0x6d2b79f5, 0x1b873593);
+  x ^= x >>> 13;
+  x = Math.imul(x, 0x85ebca6b);
+  x ^= x >>> 16;
+  return (x >>> 0) / 4294967295;
+}
+
+function getRandomProfileY(t: number, amount: number) {
+  const knots = 8;
+  const u = ((t + 1) / 2) * knots;
+  const i = Math.min(knots - 1, Math.max(0, Math.floor(u)));
+  const a = smoothstep(u - i);
+  const y0 = (hashRandom(i) * 2 - 1) * amount;
+  const y1 = (hashRandom(i + 1) * 2 - 1) * amount;
+  return y0 + (y1 - y0) * a;
+}
+
+function getProfileY(t: number, yProfile: string, lift: number, yAmount: number) {
+  const amount = lift + yAmount;
+  const hump = Math.sin((1 - Math.abs(t)) * Math.PI / 2);
+
+  if (yProfile === "cap") return -hump * amount;
+  if (yProfile === "arc") return hump * amount;
+  if (yProfile === "sin") return Math.sin(t * Math.PI) * amount;
+  if (yProfile === "random") return getRandomProfileY(t, amount);
   return 0;
+}
+
+function getAnchorTopY(anchor: YProfileAnchor) {
+  if (anchor === "top") return 0;
+  if (anchor === "bottom") return CARD_H;
+  return CARD_H / 2;
 }
 
 function resolveSpacing(spacing: number, unit: SpacingUnit) {
   return unit === "percent" ? CARD_W * (spacing / 100) : spacing;
 }
 
-function makeCurveLayout(
+function makeCurveGeometry(
   count: number,
   spacing: number,
   spacingUnit: SpacingUnit,
   spacingBasis: SpacingBasis,
-  yProfileAnchor: YProfileAnchor,
   lift: number,
   yProfile: string,
-  yAmount: number,
-  spread: number,
-  open01: number
+  yAmount: number
 ) {
   const center = (count - 1) / 2;
   const spacingPx = resolveSpacing(spacing, spacingUnit);
@@ -52,7 +76,7 @@ function makeCurveLayout(
   const halfDistance = centerStep * center;
   const halfRange = Math.max(1, halfDistance);
   const samples = 240;
-  const curve = Array.from({ length: samples + 1 }, (_, i) => {
+  const curve: CurvePoint[] = Array.from({ length: samples + 1 }, (_, i) => {
     const t = -1 + (i / samples) * 2;
     return {
       t,
@@ -68,31 +92,115 @@ function makeCurveLayout(
   }
   const centerLength = lengths[lengths.length - 1] / 2;
 
-  const pointAtLength = (target: number) => {
-    const clamped = Math.min(lengths[lengths.length - 1], Math.max(0, target));
-    let hi = lengths.findIndex((len) => len >= clamped);
-    if (hi <= 0) return curve[0];
-    const lo = hi - 1;
-    const span = Math.max(0.0001, lengths[hi] - lengths[lo]);
-    const a = (clamped - lengths[lo]) / span;
+  const sampleBetween = (lo: number, hi: number, a: number): SampledCurvePoint => {
+    const dx = curve[hi].x - curve[lo].x;
+    const dy = curve[hi].y - curve[lo].y;
     return {
       t: curve[lo].t + (curve[hi].t - curve[lo].t) * a,
-      x: curve[lo].x + (curve[hi].x - curve[lo].x) * a,
-      y: curve[lo].y + (curve[hi].y - curve[lo].y) * a
+      x: curve[lo].x + dx * a,
+      y: curve[lo].y + dy * a,
+      tangentAngle: (Math.atan2(dy, dx) * 180) / Math.PI
     };
   };
 
-  const anchorLocalY = getAnchorLocalY(yProfileAnchor);
+  const pointAtLength = (target: number) => {
+    const clamped = Math.min(lengths[lengths.length - 1], Math.max(0, target));
+    let hi = lengths.findIndex((len) => len >= clamped);
+    if (hi <= 0) return sampleBetween(0, 1, 0);
+    const lo = hi - 1;
+    const span = Math.max(0.0001, lengths[hi] - lengths[lo]);
+    const a = (clamped - lengths[lo]) / span;
+    return sampleBetween(lo, hi, a);
+  };
+
+  return { center, centerStep, centerLength, curve, pointAtLength };
+}
+
+function makeCurveLayout(
+  count: number,
+  spacing: number,
+  spacingUnit: SpacingUnit,
+  spacingBasis: SpacingBasis,
+  yProfileAnchor: YProfileAnchor,
+  lift: number,
+  yProfile: string,
+  yAmount: number,
+  spread: number,
+  open01: number
+) {
+  const { center, centerStep, centerLength, pointAtLength } = makeCurveGeometry(
+    count,
+    spacing,
+    spacingUnit,
+    spacingBasis,
+    lift,
+    yProfile,
+    yAmount
+  );
+  const anchorFromOriginY = getAnchorTopY(yProfileAnchor) - CARD_ORIGIN_Y;
 
   return Array.from({ length: count }, (_, i) => {
     const point = pointAtLength(centerLength + (i - center) * centerStep);
-    const rotation = (i - center) * (spread / Math.max(count - 1, 1));
+    const denom = Math.max(center, 1);
+    const normalRotation = point.tangentAngle;
+    const spreadOffset = ((i - center) / denom) * spread;
+    const rotation = (normalRotation + spreadOffset) * open01;
     const rad = (rotation * Math.PI) / 180;
-    const rotatedAnchorY = Math.cos(rad) * anchorLocalY;
+    const rotatedAnchorX = -Math.sin(rad) * anchorFromOriginY;
+    const rotatedAnchorY = Math.cos(rad) * anchorFromOriginY;
     return {
-      x: point.x * open01,
-      y: (point.y - rotatedAnchorY + anchorLocalY) * open01,
-      rotation: rotation * open01
+      x: (point.x - rotatedAnchorX) * open01,
+      y: (point.y - CARD_ORIGIN_FROM_BOTTOM - rotatedAnchorY) * open01,
+      rotation
+    };
+  });
+}
+
+function makeReferencePathD(
+  count: number,
+  spacing: number,
+  spacingUnit: SpacingUnit,
+  spacingBasis: SpacingBasis,
+  lift: number,
+  yProfile: string,
+  yAmount: number,
+  open01: number
+) {
+  const { curve } = makeCurveGeometry(count, spacing, spacingUnit, spacingBasis, lift, yProfile, yAmount);
+  return curve
+    .map((point, i) => {
+      const x = STAGE_W / 2 + point.x * open01;
+      const y = STAGE_H + point.y * open01;
+      return `${i === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
+    })
+    .join(" ");
+}
+
+function makeAlignmentPoints(
+  count: number,
+  spacing: number,
+  spacingUnit: SpacingUnit,
+  spacingBasis: SpacingBasis,
+  lift: number,
+  yProfile: string,
+  yAmount: number,
+  open01: number
+) {
+  const { center, centerStep, centerLength, pointAtLength } = makeCurveGeometry(
+    count,
+    spacing,
+    spacingUnit,
+    spacingBasis,
+    lift,
+    yProfile,
+    yAmount
+  );
+
+  return Array.from({ length: count }, (_, i) => {
+    const point = pointAtLength(centerLength + (i - center) * centerStep);
+    return {
+      x: STAGE_W / 2 + point.x * open01,
+      y: STAGE_H + point.y * open01
     };
   });
 }
@@ -106,7 +214,7 @@ export const demoCardDealFan: Demo = {
     sourceX: 0,
     sourceY: 240,
     open: 1,
-    spread: 60,
+    spread: 0,
     spacing: 50,
     spacingUnit: "px",
     spacingBasis: "center",
@@ -123,8 +231,8 @@ export const demoCardDealFan: Demo = {
     { key: "sourceX", label: "sourceX(px)", type: "range", min: -360, max: 360, step: 10 },
     { key: "sourceY", label: "sourceY(px)", type: "range", min: -240, max: 240, step: 10 },
     { key: "open", label: "open(0..1)", type: "range", min: 0, max: 1, step: 0.01 },
-    { key: "spread", label: "spread(deg)", type: "range", min: 0, max: 90, step: 1 },
-    { key: "spacing", label: "spacing", type: "range", min: 10, max: 120, step: 1 },
+    { key: "spread", label: "spread(deg)", type: "range", min: -90, max: 90, step: 1 },
+    { key: "spacing", label: "spacing", type: "range", min: 0, max: 120, step: 1 },
     {
       key: "spacingUnit",
       label: "spacingUnit",
@@ -149,9 +257,9 @@ export const demoCardDealFan: Demo = {
       label: "yProfile",
       type: "select",
       options: [
-        { label: "arc(圆弧)", value: "arc" },
+        { label: "arc(下弯)", value: "arc" },
         { label: "sin(正弦)", value: "sin" },
-        { label: "cap(反向拱起)", value: "cap" },
+        { label: "cap(上拱)", value: "cap" },
         { label: "flat(全平)", value: "flat" },
         { label: "random(随机)", value: "random" }
       ]
@@ -204,18 +312,42 @@ const count = ${count};
 const open = ${open}; // 0..1
 const cardW = ${CARD_W};
 const cardH = ${CARD_H};
+const originY = cardH * 1.2;
+const originFromBottom = originY - cardH;
 const spacingPx = "${spacingUnit}" === "percent" ? cardW * (${spacing} / 100) : ${spacing};
 const centerStep = "${spacingBasis}" === "edge" ? spacingPx + cardW : spacingPx;
-const anchorY = { top: -cardH / 2, center: 0, bottom: cardH / 2 }["${yProfileAnchor}"];
+const anchorFromOriginY = { top: 0, center: cardH / 2, bottom: cardH }["${yProfileAnchor}"] - originY;
+
+function smoothstep(n) {
+  return n * n * (3 - 2 * n);
+}
+
+function hashRandom(n) {
+  let x = Math.imul(n + 0x6d2b79f5, 0x1b873593);
+  x ^= x >>> 13;
+  x = Math.imul(x, 0x85ebca6b);
+  x ^= x >>> 16;
+  return (x >>> 0) / 4294967295;
+}
+
+function randomProfileY(t, amount) {
+  const knots = 8;
+  const u = ((t + 1) / 2) * knots;
+  const i = Math.min(knots - 1, Math.max(0, Math.floor(u)));
+  const a = smoothstep(u - i);
+  const y0 = (hashRandom(i) * 2 - 1) * amount;
+  const y1 = (hashRandom(i + 1) * 2 - 1) * amount;
+  return y0 + (y1 - y0) * a;
+}
 
 function profileY(t) {
-  const baseLift = -Math.abs(t) * ${lift};
-  let f = 0;
-  if ("${yProfile}" === "arc") f = Math.abs(t);
-  else if ("${yProfile}" === "sin") f = Math.sin(Math.abs(t) * Math.PI / 2);
-  else if ("${yProfile}" === "cap") f = -Math.abs(t);
-  else if ("${yProfile}" === "random") f = Math.sin(t * 12.9898 + 78.233) * 0.8;
-  return baseLift - f * ${yAmount};
+  const amount = ${lift} + ${yAmount};
+  const hump = Math.sin((1 - Math.abs(t)) * Math.PI / 2);
+  if ("${yProfile}" === "cap") return -hump * amount;
+  if ("${yProfile}" === "arc") return hump * amount;
+  if ("${yProfile}" === "sin") return Math.sin(t * Math.PI) * amount;
+  if ("${yProfile}" === "random") return randomProfileY(t, amount);
+  return 0;
 }
 
 function curveLayout(open01) {
@@ -235,19 +367,26 @@ function curveLayout(open01) {
     const hi = Math.max(1, lengths.findIndex((len) => len >= clamped));
     const lo = hi - 1;
     const a = (clamped - lengths[lo]) / Math.max(0.0001, lengths[hi] - lengths[lo]);
+    const dx = curve[hi].x - curve[lo].x;
+    const dy = curve[hi].y - curve[lo].y;
     return {
-      x: curve[lo].x + (curve[hi].x - curve[lo].x) * a,
-      y: curve[lo].y + (curve[hi].y - curve[lo].y) * a
+      x: curve[lo].x + dx * a,
+      y: curve[lo].y + dy * a,
+      tangentAngle: Math.atan2(dy, dx) * 180 / Math.PI
     };
   };
   const centerLength = lengths[lengths.length - 1] / 2;
   return Array.from({ length: count }, (_, i) => {
     const point = pointAt(centerLength + (i - center) * centerStep);
-    const rotation = (i - center) * (${spread} / Math.max(count - 1, 1));
-    const rotatedAnchorY = Math.cos(rotation * Math.PI / 180) * anchorY;
+    const normalRotation = point.tangentAngle;
+    const spreadOffset = ((i - center) / Math.max(center, 1)) * ${spread};
+    const rotation = (normalRotation + spreadOffset) * open01;
+    const rad = rotation * Math.PI / 180;
+    const rotatedAnchorX = -Math.sin(rad) * anchorFromOriginY;
+    const rotatedAnchorY = Math.cos(rad) * anchorFromOriginY;
     return {
-      x: point.x * open01,
-      y: (point.y - rotatedAnchorY + anchorY) * open01,
+      x: (point.x - rotatedAnchorX) * open01,
+      y: (point.y - originFromBottom - rotatedAnchorY) * open01,
       rotation: rotation * open01
     };
   });
@@ -285,6 +424,34 @@ gsap.to(cards, {
     const duration = Number(p.duration);
     const stagger = Number(p.stagger);
     const ease = String(p.ease);
+    const referencePathD = makeReferencePathD(
+      count,
+      spacing,
+      spacingUnit,
+      spacingBasis,
+      lift,
+      yProfile,
+      yAmount,
+      mode === "preview" ? 1 : open
+    );
+    const alignmentPoints = makeAlignmentPoints(
+      count,
+      spacing,
+      spacingUnit,
+      spacingBasis,
+      lift,
+      yProfile,
+      yAmount,
+      mode === "preview" ? 1 : open
+    );
+    const alignmentPointEls = alignmentPoints
+      .map(
+        (point) => `
+          <circle cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="4.5" fill="rgba(16,73,241,0.86)" stroke="rgba(255,255,255,0.92)" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+          <circle cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="7.5" fill="none" stroke="rgba(16,73,241,0.34)" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+        `
+      )
+      .join("");
 
     // 独立计算坐标的方法，用于 hover 恢复或 open 调整
     const layoutTo = (cards: HTMLElement[], open01: number, dur = 0.3, dEase = "power2.out", stg = 0) => {
@@ -335,6 +502,10 @@ gsap.to(cards, {
                     `
                   )
                   .join("")}
+                <svg class="absolute inset-0 z-10 pointer-events-none overflow-visible" viewBox="0 0 ${STAGE_W} ${STAGE_H}" aria-hidden="true">
+                  <path d="${referencePathD}" fill="none" stroke="rgba(16,73,241,0.62)" stroke-width="1.5" stroke-dasharray="6 6" vector-effect="non-scaling-stroke" />
+                  ${alignmentPointEls}
+                </svg>
               </div>
             </div>
           </div>

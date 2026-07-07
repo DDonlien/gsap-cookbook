@@ -196,8 +196,8 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
       en: "Open amount (0–1): 0 closed, 1 fully fanned."
     },
     spread: {
-      zh: "扇形展开角度范围（度）。",
-      en: "Fan spread angle range (degrees)."
+      zh: "沿曲线法线放置后的附加旋转角：右侧为正、左侧为负，中间为 0。",
+      en: "Additional rotation after normal alignment: positive on the right, negative on the left, zero at center."
     },
     spacing: {
       zh: "相邻卡牌在分布曲线上的间距，可按固定值或卡牌宽度百分比计算。",
@@ -212,20 +212,20 @@ const CONTROL_HELP: Record<string, Record<string, I18nHelp>> = {
       en: "Spacing basis: center-to-center, or right edge of one card to left edge of the next."
     },
     lift: {
-      zh: "两侧卡牌的上抬基础高度（形成弧线）。",
-      en: "Base lift amount for outer cards (creates an arc)."
+      zh: "曲线形变的基础幅度；flat 会保持直线。",
+      en: "Base curve deformation amount; flat remains a straight line."
     },
     yProfile: {
-      zh: "手牌的额外 Y 轴分布形状（如正弦、随机等）。",
-      en: "Extra Y-axis profile shape (e.g. sin, random)."
+      zh: "手牌的 Y 轴分布形状：cap 上拱、arc 下弯、flat 直线、random 随机。",
+      en: "Y-axis profile: cap arches up, arc bends down, flat is straight, random is randomized."
     },
     yProfileAnchor: {
       zh: "Y profile 贴合卡牌的位置：中央顶边、正中央或中央底边。",
       en: "Card point aligned to the Y profile: top center, center, or bottom center."
     },
     yAmount: {
-      zh: "额外 Y 轴分布的影响幅度（px）。",
-      en: "Amplitude for the extra Y profile (px)."
+      zh: "曲线形变的额外幅度（px）。",
+      en: "Extra curve deformation amplitude (px)."
     },
     duration: {
       zh: "发牌移动的时长。",
