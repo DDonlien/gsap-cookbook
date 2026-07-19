@@ -6,6 +6,7 @@ import { demoScrollTriggerPin } from "./scrollTriggerPin";
 import { demoTextReveal } from "./textReveal";
 import { demoTimelineOffsetSeq } from "./timelineOffsetSeq";
 import { demoGridWaveEffect } from "./gridWaveEffect";
+import { demoMoveMatrix } from "./moveMatrix";
 import { demoCardDealFan } from "./cardDealFan";
 import { demoCardFlip } from "./cardFlip";
 import { demoHoverTilt } from "./hoverTilt";
@@ -57,5 +58,6 @@ export const demos: Demo[] = [
   demoScrollTriggerPin,
   demoTextReveal,
   demoTimelineOffsetSeq,
-  demoGridWaveEffect
+  demoGridWaveEffect,
+  demoMoveMatrix
 ];
