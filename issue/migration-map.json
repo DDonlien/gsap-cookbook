@@ -1,0 +1,28 @@
+{
+  "history_base": "800d90ac4554ff34a5834511070630e8cb2af05a",
+  "versioncontrolid": "versioncontrolid",
+  "versioncontrolid_definition": "pending",
+  "sources": [
+    {
+      "path": "requirement.md",
+      "sha256": "bb81683f259e6604506aab5887675ebdd841d8ac5743d8db3479b6d247dc539e",
+      "bytes": 559,
+      "head": "800d90ac4554ff34a5834511070630e8cb2af05a",
+      "tracked": true,
+      "status_before": "",
+      "blob": "52b86c18224b6fb240ed6b94b916730e609fc1b7"
+    }
+  ],
+  "requirements": [
+    {
+      "path": "requirement.md",
+      "issues": [
+        "issue/issue-DOC-migration-20261023-DOC-migrate-project-workflow-versioncontrolid.md"
+      ],
+      "legacy_ids": []
+    }
+  ],
+  "logs": [],
+  "issues": [],
+  "note": "Original states retained; historical log evidence does not complete current tasks."
+}
