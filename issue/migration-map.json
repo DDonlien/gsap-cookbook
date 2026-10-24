@@ -1,7 +1,7 @@
 {
   "history_base": "800d90ac4554ff34a5834511070630e8cb2af05a",
-  "versioncontrolid": "versioncontrolid",
-  "versioncontrolid_definition": "pending",
+  "versioncontrolid": null,
+  "versioncontrolid_definition": "task implementation Git commit hash or final submitted Perforce changelist",
   "sources": [
     {
       "path": "requirement.md",
@@ -17,12 +17,31 @@
     {
       "path": "requirement.md",
       "issues": [
-        "issue/issue-DOC-migration-20261023-DOC-migrate-project-workflow-versioncontrolid.md"
+        "issue/issue_迁移项目任务与协作记录_684e4249.md"
       ],
       "legacy_ids": []
     }
   ],
   "logs": [],
   "issues": [],
-  "note": "Original states retained; historical log evidence does not complete current tasks."
+  "note": "Original states retained; historical log evidence does not complete current tasks.",
+  "versioncontrolid_status": "recorded per issue; unverified implementation versions omitted from filenames",
+  "naming_corrections": [
+    {
+      "time": "2026-10-24 06:07:34 UTC",
+      "old_to_current_files": {
+        "issue/issue-template.md": "issue/issue_template.md"
+      },
+      "new_format": "issue-specific-task-description[-verified-implementation-version].md",
+      "batch": "final-underscore-rules"
+    },
+    {
+      "time": "2026-10-24 06:30:10 UTC",
+      "old_to_current_files": {
+        "issue/issue-DOC-migration-20261023-DOC-migrate-project-workflow-versioncontrolid.md": "issue/issue_迁移项目任务与协作记录_684e4249.md"
+      },
+      "new_format": "issue-specific-task-description[-verified-implementation-version].md",
+      "batch": "native-document-records"
+    }
+  ]
 }
